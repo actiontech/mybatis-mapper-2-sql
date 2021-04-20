@@ -4,21 +4,28 @@ import "encoding/xml"
 
 type Node interface {
 	Scan(start *xml.StartElement) error
-	String() string
 	AddChildren(ns ...Node) error
+	String() string
+	GetStmt(ctx *Context) (string, error)
 }
 
 type ChildrenNode struct {
-	children []Node
+	Children []Node
 }
 
 func NewNode() *ChildrenNode {
 	return &ChildrenNode{
-		children: []Node{},
+		Children: []Node{},
 	}
 }
 
 func (n *ChildrenNode) AddChildren(ns ...Node) error {
-	n.children = append(n.children, ns...)
+	n.Children = append(n.Children, ns...)
 	return nil
+}
+
+type emptyPrint struct{}
+
+func (ep *emptyPrint) String() string {
+	return ""
 }

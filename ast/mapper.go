@@ -6,65 +6,16 @@ import (
 	"fmt"
 )
 
-func Scan(start *xml.StartElement) (Node, error) {
-	var node Node
-	switch start.Name.Local {
-	case "mapper":
-		node = NewMapper()
-	case "sql", "update":
-		node = NewSqlNode()
-	default:
-		return node, nil
-		//return node, fmt.Errorf("unknow xml %s", start.Name.Local)
-	}
-	node.Scan(start)
-	return node, nil
-}
-
-type Data struct {
-}
-
-type Param struct {
-}
-
-type IfNode struct {
-}
-
-type WhereNode struct {
-}
-
-type SqlNode struct {
-	*ChildrenNode
-	Id string
-}
-
-func NewSqlNode() *SqlNode {
-	n := &SqlNode{}
-	n.ChildrenNode = NewNode()
-	return n
-}
-
-func (s *SqlNode) Scan(start *xml.StartElement) error {
-	for _, attr := range start.Attr {
-		if attr.Name.Local == "id" {
-			s.Id = attr.Value
-		}
-	}
-	return nil
-}
-
-func (s *SqlNode) String() string {
-	return fmt.Sprintf("sql: %s", s.Id)
-}
-
 type Mapper struct {
-	NameSpace string
-	SqlNodes  map[string]*SqlNode
+	NameSpace  string
+	SqlNodes   map[string]*SqlNode
+	QueryNodes map[string]*QueryNode
 }
 
 func NewMapper() *Mapper {
 	return &Mapper{
-		SqlNodes: map[string]*SqlNode{},
+		SqlNodes:   map[string]*SqlNode{},
+		QueryNodes: map[string]*QueryNode{},
 	}
 }
 
@@ -76,22 +27,14 @@ func (m *Mapper) AddChildren(ns ...Node) error {
 				return fmt.Errorf("sql id %s is repeat", nt.Id)
 			}
 			m.SqlNodes[nt.Id] = nt
+		case *QueryNode:
+			if _, ok := m.QueryNodes[nt.Id]; ok {
+				return fmt.Errorf("%s id %s is repeat", nt.Type, nt.Id)
+			}
+			m.QueryNodes[nt.Id] = nt
 		}
 	}
 	return nil
-}
-
-func (m *Mapper) String() string {
-	buff := &bytes.Buffer{}
-	buff.WriteString("mapper: ")
-	buff.WriteString(m.NameSpace)
-	buff.WriteString("\n")
-	for _, sql := range m.SqlNodes {
-		buff.WriteString("\t")
-		buff.WriteString(sql.String())
-		buff.WriteString("\n")
-	}
-	return buff.String()
 }
 
 func (m *Mapper) Scan(start *xml.StartElement) error {
@@ -101,4 +44,25 @@ func (m *Mapper) Scan(start *xml.StartElement) error {
 		}
 	}
 	return nil
+}
+
+func (m *Mapper) String() string {
+	buff := bytes.Buffer{}
+	for _, child := range m.QueryNodes {
+		buff.WriteString(child.String())
+	}
+	return buff.String()
+}
+
+func (m *Mapper) GetStmt(ctx *Context) (string, error) {
+	buff := bytes.Buffer{}
+	ctx.Sqls = m.SqlNodes
+	for _, a := range m.QueryNodes {
+		data, err := a.GetStmt(ctx)
+		if err != nil {
+			return "", err
+		}
+		buff.WriteString(data)
+	}
+	return buff.String(), nil
 }
