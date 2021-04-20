@@ -27,13 +27,13 @@ func (s *QueryNode) Scan(start *xml.StartElement) error {
 	return nil
 }
 
-func (s *QueryNode) String() string {
-	buff := bytes.Buffer{}
-	for _, child := range s.Children {
-		buff.WriteString(child.String())
-	}
-	return buff.String()
-}
+//func (s *QueryNode) String() string {
+//	buff := bytes.Buffer{}
+//	for _, child := range s.Children {
+//		buff.WriteString(child.String())
+//	}
+//	return buff.String()
+//}
 
 func (s *QueryNode) GetStmt(ctx *Context) (string, error){
 	buff := bytes.Buffer{}

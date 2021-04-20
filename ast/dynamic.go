@@ -4,12 +4,27 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"strings"
 )
 
 type IfNode struct {
+	*ChildrenNode
 	Expression string
+}
+
+func NewIfNode() *IfNode {
+	n := &IfNode{}
+	n.ChildrenNode = NewNode()
+	return n
+}
+
+func (n *IfNode) Scan(start *xml.StartElement) error {
+	for _, attr := range start.Attr {
+		if attr.Name.Local == "test" {
+			n.Expression = attr.Value
+		}
+	}
+	return nil
 }
 
 type ChooseNode struct {
@@ -17,222 +32,174 @@ type ChooseNode struct {
 	Otherwise *OtherwiseNode
 }
 
-type WhenNode struct {
-	Expression string
-}
-
-type TrimNode struct {
-}
-
-type OtherwiseNode struct {
-}
-
-type CharData struct {
-	tmp    bytes.Buffer
-	reader *bytes.Reader
-	Data   []Data
-}
-
-func NewData(data []byte) *CharData {
-	return &CharData{
-		tmp:    bytes.Buffer{},
-		reader: bytes.NewReader(data),
-		Data:   []Data{},
+func NewChooseNode() *ChooseNode {
+	return &ChooseNode{
+		When: []*WhenNode{},
 	}
 }
 
-func (d *CharData) Scan(start *xml.StartElement) error {
+func (n *ChooseNode) Scan(start *xml.StartElement) error {
 	return nil
 }
 
-func (d *CharData) AddChildren(ns ...Node) error {
-	return nil
-}
-
-func (d *CharData) GetStmt(ctx *Context) (string, error) {
-	buff := bytes.Buffer{}
-	for _, child := range d.Data {
-		switch dt := child.(type) {
-		case Value:
-			buff.WriteString(dt.String())
-		case *Param:
-			buff.WriteString(dt.String())
-		case *Variable:
-			variable, ok := ctx.GetVariable(dt.Name)
-			if !ok {
-				return "", fmt.Errorf("variable %s undifine", dt.Name)
+func (n *ChooseNode) AddChildren(ns ...Node) error {
+	for _, node := range ns {
+		switch nt := node.(type) {
+		case *WhenNode:
+			n.When = append(n.When, nt)
+		case *OtherwiseNode:
+			if n.Otherwise != nil {
+				return fmt.Errorf("otherwise is repeat in <choose>")
 			}
-			buff.WriteString(variable)
+			n.Otherwise = nt
+		default:
+			return fmt.Errorf("data is invalid in <choose>")
 		}
 	}
+	return nil
+}
+
+func (n *ChooseNode) GetStmt(ctx *Context) (string, error) {
+	buff := bytes.Buffer{}
+	for _, a := range n.When {
+		data, err := a.GetStmt(ctx)
+		if err != nil {
+			return "", err
+		}
+		buff.WriteString(data)
+	}
+	data, err := n.Otherwise.GetStmt(ctx)
+	if err != nil {
+		return "", err
+	}
+	buff.WriteString(data)
 	return buff.String(), nil
 }
 
-func (d *CharData) String() string {
+type WhenNode struct {
+	Expression string
+	Data       *Data
+}
+
+func NewWhenNode() *WhenNode {
+	return &WhenNode{}
+}
+
+func (n *WhenNode) Scan(start *xml.StartElement) error {
+	for _, attr := range start.Attr {
+		if attr.Name.Local == "test" {
+			n.Expression = attr.Value
+		}
+	}
+	return nil
+}
+
+func (n *WhenNode) AddChildren(ns ...Node) error {
+	err := fmt.Errorf(`<when test="%s"> data is invalid`, n.Expression)
+	if len(ns) != 1 {
+		return err
+	}
+	switch d := ns[0].(type) {
+	case *Data:
+		n.Data = d
+	default:
+		return err
+	}
+	return nil
+}
+
+func (n *WhenNode) GetStmt(ctx *Context) (string, error) {
+	return n.Data.GetStmt(ctx)
+}
+
+type OtherwiseNode struct {
+	Data *Data
+}
+
+func NewOtherwiseNode() *OtherwiseNode {
+	return &OtherwiseNode{}
+}
+
+func (n *OtherwiseNode) Scan(start *xml.StartElement) error {
+	return nil
+}
+
+func (n *OtherwiseNode) AddChildren(ns ...Node) error {
+	err := fmt.Errorf(`<ohterwise> data is invalid`)
+	if len(ns) != 1 {
+		return err
+	}
+	switch d := ns[0].(type) {
+	case *Data:
+		n.Data = d
+	default:
+		return err
+	}
+	return nil
+}
+
+func (n *OtherwiseNode) GetStmt(ctx *Context) (string, error) {
+	return n.Data.GetStmt(ctx)
+}
+
+type TrimNode struct {
+	*ChildrenNode
+	Name            string
+	Prefix          string
+	PrefixOverrides []string
+	SuffixOverrides []string
+}
+
+func NewTrimNode() *TrimNode {
+	n := &TrimNode{}
+	n.ChildrenNode = NewNode()
+	return &TrimNode{}
+}
+
+func (n *TrimNode) Scan(start *xml.StartElement) error {
+	n.Name = start.Name.Local
+	switch start.Name.Local {
+	case "where":
+		n.Prefix = "WHERE"
+		n.PrefixOverrides = []string{"and ", "or"}
+	case "set":
+		n.Prefix = "SET"
+		n.SuffixOverrides = []string{","}
+	case "trim":
+		for _, attr := range start.Attr {
+			if attr.Name.Local == "prefix" {
+				n.Prefix = attr.Value
+			}
+			if attr.Name.Local == "prefixOverrides" {
+				n.PrefixOverrides = strings.Split(attr.Value, "|")
+			}
+			if attr.Name.Local == "suffixOverrides" {
+				n.SuffixOverrides = strings.Split(attr.Value, "|")
+			}
+		}
+	}
+	return nil
+}
+
+func (n *TrimNode) GetStmt(ctx *Context) (string, error) {
 	buff := bytes.Buffer{}
-	for _, child := range d.Data {
-		buff.WriteString(child.String())
-	}
-	return buff.String()
-}
-
-func (d *CharData) ScanData() error {
-	for {
-		var err error
-		r, err := d.read()
-		if err == io.EOF { // found end of element
-			break
-		}
+	for _, a := range n.Children {
+		data, err := a.GetStmt(ctx)
 		if err != nil {
-			return err
+			return "", err
 		}
-
-		switch r {
-		case '#':
-			s, err := d.read()
-			if err == io.EOF { // found end of element
-				break
-			}
-			if s == '{' {
-				err := d.scanParam()
-				if err != nil {
-					return err
-				}
-			}
-		case '$':
-			s, err := d.read()
-			if err == io.EOF { // found end of element
-				break
-			}
-			if s == '{' {
-				err := d.scanVariable()
-				if err != nil {
-					return err
-				}
-			}
-		default:
-			err := d.scanValue()
-			if err != nil {
-				return err
-			}
-		}
+		buff.WriteString(data)
 	}
-	return nil
-}
-
-func (d *CharData) read() (rune, error) {
-	r, _, err := d.reader.ReadRune()
-	if err != nil {
-		return r, err
+	body := strings.TrimSpace(buff.String())
+	for _, po := range n.PrefixOverrides {
+		body = strings.TrimPrefix(body, po)
 	}
-	_, err = d.tmp.WriteRune(r)
-	if err != nil {
-		return r, err
+	for _, so := range n.SuffixOverrides {
+		body = strings.TrimSuffix(body, so)
 	}
-	return r, nil
-}
-
-func (d *CharData) unRead() {
-	d.reader.Seek(-1, io.SeekCurrent)
-}
-
-func (d *CharData) clean() {
-	d.tmp.Reset()
-}
-
-func (d *CharData) scanParam() error {
-	d.clean()
-	for {
-		r, err := d.read()
-		if err == io.EOF {
-			return fmt.Errorf("data is invalid, not found \"}\" for param")
-		}
-		if err != nil {
-			return err
-		}
-		if r == '}' {
-			break
-		}
-	}
-	data := strings.TrimSuffix(d.tmp.String(), "}")
-	d.Data = append(d.Data, &Param{Name: data})
-	d.clean()
-	return nil
-}
-
-func (d *CharData) scanVariable() error {
-	d.clean()
-	for {
-		r, err := d.read()
-		if err == io.EOF {
-			return fmt.Errorf("data is invalid, not found \"}\" for vaiable")
-		}
-		if err != nil {
-			return err
-		}
-		if r == '}' {
-			break
-		}
-	}
-	data := strings.TrimSuffix(d.tmp.String(), "}")
-	d.Data = append(d.Data, &Variable{Name: data})
-	d.clean()
-	return nil
-}
-
-func (d *CharData) scanValue() error {
-	var first rune
-	var second rune
-	for {
-		r, err := d.read()
-		if err == io.EOF { // found end of element
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if r == '#' || r == '$' {
-			first = r
-			s, err := d.read()
-			if err == io.EOF { // found end of element
-				break
-			}
-			second = s
-			if s == '{' {
-				d.unRead()
-				d.unRead()
-				break
-			}
-		}
-	}
-	data := strings.TrimSuffix(d.tmp.String(), string([]rune{first, second}))
-	d.Data = append(d.Data, Value(data))
-	d.clean()
-	return nil
-}
-
-type Data interface {
-	String() string
-}
-
-type Value string
-
-func (v Value) String() string {
-	return string(v)
-}
-
-type Param struct {
-	Name string
-}
-
-func (p *Param) String() string {
-	return "?"
-}
-
-type Variable struct {
-	Name string
-}
-
-func (p *Variable) String() string {
-	return "$"
+	buff.Reset()
+	buff.WriteString(n.Prefix)
+	buff.WriteString(" ")
+	buff.WriteString(body)
+	return buff.String(), nil
 }

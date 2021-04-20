@@ -7,7 +7,7 @@ import (
 
 type IncludeNode struct {
 	emptyPrint
-	RefId      Data
+	RefId      DataNode
 	Properties map[string]*PropertyNode
 }
 
@@ -25,10 +25,16 @@ func (i *IncludeNode) Scan(start *xml.StartElement) error {
 			if err != nil {
 				return err
 			}
-			if len(data.Data) != 1 {
-				return fmt.Errorf("include refid must be a param or a string")
+
+			if len(data.Nodes) != 1 {
+				return fmt.Errorf("include refid must be a variable or a string")
 			}
-			i.RefId = data.Data[0]
+			switch data.Nodes[0].(type) {
+			case Value, *Variable:
+			default:
+				return fmt.Errorf("include refid must be a variable or a string")
+			}
+			i.RefId = data.Nodes[0]
 		}
 	}
 	return nil

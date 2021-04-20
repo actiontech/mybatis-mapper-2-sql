@@ -46,13 +46,13 @@ func (m *Mapper) Scan(start *xml.StartElement) error {
 	return nil
 }
 
-func (m *Mapper) String() string {
-	buff := bytes.Buffer{}
-	for _, child := range m.QueryNodes {
-		buff.WriteString(child.String())
-	}
-	return buff.String()
-}
+//func (m *Mapper) String() string {
+//	buff := bytes.Buffer{}
+//	for _, child := range m.QueryNodes {
+//		buff.WriteString(child.String())
+//	}
+//	return buff.String()
+//}
 
 func (m *Mapper) GetStmt(ctx *Context) (string, error) {
 	buff := bytes.Buffer{}

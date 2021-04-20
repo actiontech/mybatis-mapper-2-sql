@@ -11,7 +11,7 @@ func TestScan(t *testing.T) {
 		t.Errorf("parse error: %v", err)
 		return
 	}
-	if len(d.Data) != 4 {
-		t.Errorf("data length is 4, actual is %d", d.Data)
+	if len(d.Nodes) != 4 {
+		t.Errorf("data length is 4, actual is %d", len(d.Nodes))
 	}
 }

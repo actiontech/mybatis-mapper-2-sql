@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestParser(t *testing.T) {
+func TestParserInclude(t *testing.T) {
 	testParser(t,
 		`
 <mapper namespace="Test">
@@ -33,6 +33,41 @@ func TestParser(t *testing.T) {
 		SomeTable
 `)
 }
+
+func TestParserIf(t *testing.T) {
+	testParser(t,
+		`
+<mapper namespace="Test">
+	   <select id="testIf">
+        SELECT
+        name,
+        category,
+        price
+        FROM
+        fruits
+        WHERE
+        1=1
+        <if test="category != null and category !=''">
+            AND category = #{category}
+        </if>
+        <if test="price != null and price !=''">
+            AND price = ${price}
+            <if test="price >= 400">
+                AND name = 'Fuji'
+            </if>
+        </if>
+    </select>
+</mapper>`,
+		`
+		select
+		field1, field2, field3
+		
+		from
+		
+		SomeTable
+`)
+}
+
 
 func testParser(t *testing.T, xmlData, expect string) {
 	actual, err := ParseXML(xmlData)
