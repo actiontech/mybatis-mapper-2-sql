@@ -6,7 +6,6 @@ import (
 )
 
 type IncludeNode struct {
-	emptyPrint
 	RefId      DataNode
 	Properties map[string]*PropertyNode
 }
@@ -81,7 +80,6 @@ func (i *IncludeNode) GetStmt(ctx *Context) (string, error) {
 }
 
 type PropertyNode struct {
-	emptyPrint
 	Name  string
 	Value string
 }

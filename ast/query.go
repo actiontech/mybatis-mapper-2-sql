@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"encoding/xml"
+	"mybatis_mapper_2_sql/sqlfmt"
 )
 
 type QueryNode struct {
@@ -27,16 +28,9 @@ func (s *QueryNode) Scan(start *xml.StartElement) error {
 	return nil
 }
 
-//func (s *QueryNode) String() string {
-//	buff := bytes.Buffer{}
-//	for _, child := range s.Children {
-//		buff.WriteString(child.String())
-//	}
-//	return buff.String()
-//}
-
-func (s *QueryNode) GetStmt(ctx *Context) (string, error){
+func (s *QueryNode) GetStmt(ctx *Context) (string, error) {
 	buff := bytes.Buffer{}
+	ctx.QueryType = s.Type
 	for _, a := range s.Children {
 		data, err := a.GetStmt(ctx)
 		if err != nil {
@@ -44,5 +38,5 @@ func (s *QueryNode) GetStmt(ctx *Context) (string, error){
 		}
 		buff.WriteString(data)
 	}
-	return buff.String(), nil
+	return sqlfmt.FormatSQL(buff.String()), nil
 }

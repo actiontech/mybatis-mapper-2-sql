@@ -4,18 +4,21 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"strings"
 )
 
 type Mapper struct {
-	NameSpace  string
-	SqlNodes   map[string]*SqlNode
-	QueryNodes map[string]*QueryNode
+	NameSpace      string
+	SqlNodes       map[string]*SqlNode
+	QueryNodeIndex map[string]*QueryNode
+	QueryNodes     []*QueryNode
 }
 
 func NewMapper() *Mapper {
 	return &Mapper{
-		SqlNodes:   map[string]*SqlNode{},
-		QueryNodes: map[string]*QueryNode{},
+		SqlNodes:       map[string]*SqlNode{},
+		QueryNodeIndex: map[string]*QueryNode{},
+		QueryNodes:     []*QueryNode{},
 	}
 }
 
@@ -28,10 +31,11 @@ func (m *Mapper) AddChildren(ns ...Node) error {
 			}
 			m.SqlNodes[nt.Id] = nt
 		case *QueryNode:
-			if _, ok := m.QueryNodes[nt.Id]; ok {
+			if _, ok := m.QueryNodeIndex[nt.Id]; ok {
 				return fmt.Errorf("%s id %s is repeat", nt.Type, nt.Id)
 			}
-			m.QueryNodes[nt.Id] = nt
+			m.QueryNodeIndex[nt.Id] = nt
+			m.QueryNodes = append(m.QueryNodes, nt)
 		}
 	}
 	return nil
@@ -46,14 +50,6 @@ func (m *Mapper) Scan(start *xml.StartElement) error {
 	return nil
 }
 
-//func (m *Mapper) String() string {
-//	buff := bytes.Buffer{}
-//	for _, child := range m.QueryNodes {
-//		buff.WriteString(child.String())
-//	}
-//	return buff.String()
-//}
-
 func (m *Mapper) GetStmt(ctx *Context) (string, error) {
 	buff := bytes.Buffer{}
 	ctx.Sqls = m.SqlNodes
@@ -63,6 +59,10 @@ func (m *Mapper) GetStmt(ctx *Context) (string, error) {
 			return "", err
 		}
 		buff.WriteString(data)
+		if !strings.HasSuffix(strings.TrimSpace(data), ";") {
+			buff.WriteString(";")
+		}
+		buff.WriteString("\n")
 	}
 	return buff.String(), nil
 }

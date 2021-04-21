@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"mybatis_mapper_2_sql/ast"
 	"strings"
@@ -88,7 +87,7 @@ func scan(start *xml.StartElement) (ast.Node, error) {
 		node = ast.NewIncludeNode()
 	case "property":
 		node = ast.NewPropertyNode()
-	case "select", "update", "delete":
+	case "select", "update", "delete", "insert":
 		node = ast.NewQueryNode()
 	case "if":
 		node = ast.NewIfNode()
@@ -100,8 +99,11 @@ func scan(start *xml.StartElement) (ast.Node, error) {
 		node = ast.NewOtherwiseNode()
 	case "where", "set", "trim":
 		node = ast.NewTrimNode()
+	case "foreach":
+		node = ast.NewForeachNode()
 	default:
-		return node, fmt.Errorf("unknow xml <%s>", start.Name.Local)
+		return nil, nil
+		//return node, fmt.Errorf("unknow xml <%s>", start.Name.Local)
 	}
 	node.Scan(start)
 	return node, nil

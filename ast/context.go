@@ -1,8 +1,9 @@
 package ast
 
 type Context struct {
-	Variable map[string]string
-	Sqls     map[string]*SqlNode
+	QueryType string // select, insert, update, delete
+	Variable  map[string]string
+	Sqls      map[string]*SqlNode
 }
 
 func NewContext() *Context {

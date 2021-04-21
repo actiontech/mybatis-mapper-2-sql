@@ -6,7 +6,6 @@ import (
 )
 
 type SqlNode struct {
-	emptyPrint
 	*ChildrenNode
 	Id string
 }

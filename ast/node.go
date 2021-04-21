@@ -8,7 +8,6 @@ import (
 type Node interface {
 	Scan(start *xml.StartElement) error
 	AddChildren(ns ...Node) error
-	//String() string
 	GetStmt(ctx *Context) (string, error)
 }
 
@@ -37,10 +36,4 @@ func (n *ChildrenNode) GetStmt(ctx *Context) (string, error) {
 		buff.WriteString(data)
 	}
 	return buff.String(), nil
-}
-
-type emptyPrint struct{}
-
-func (ep *emptyPrint) String() string {
-	return ""
 }
