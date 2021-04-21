@@ -145,28 +145,6 @@ func (bj BinaryJSON) marshalTo(buf []byte) ([]byte, error) {
 	return buf, nil
 }
 
-//IsZero return a boolean indicate whether BinaryJSON is Zero
-func (bj BinaryJSON) IsZero() bool {
-	isZero := false
-	switch bj.TypeCode {
-	case TypeCodeString:
-		isZero = false
-	case TypeCodeLiteral:
-		isZero = false
-	case TypeCodeInt64:
-		isZero = bj.GetInt64() == 0
-	case TypeCodeUint64:
-		isZero = bj.GetUint64() == 0
-	case TypeCodeFloat64:
-		isZero = bj.GetFloat64() == 0
-	case TypeCodeArray:
-		isZero = false
-	case TypeCodeObject:
-		isZero = false
-	}
-	return isZero
-}
-
 // GetInt64 gets the int64 value.
 func (bj BinaryJSON) GetInt64() int64 {
 	return int64(endian.Uint64(bj.Value))
@@ -379,6 +357,23 @@ func marshalStringTo(buf, s []byte) []byte {
 	return buf
 }
 
+func (bj BinaryJSON) marshalValueEntryTo(buf []byte, entryOff int) ([]byte, error) {
+	tpCode := bj.Value[entryOff]
+	switch tpCode {
+	case TypeCodeLiteral:
+		buf = marshalLiteralTo(buf, bj.Value[entryOff+1])
+	default:
+		offset := endian.Uint32(bj.Value[entryOff+1:])
+		tmp := BinaryJSON{TypeCode: tpCode, Value: bj.Value[offset:]}
+		var err error
+		buf, err = tmp.marshalTo(buf)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
+	return buf, nil
+}
+
 func marshalLiteralTo(b []byte, litType byte) []byte {
 	switch litType {
 	case LiteralFalse:
@@ -397,12 +392,7 @@ func ParseBinaryFromString(s string) (bj BinaryJSON, err error) {
 		err = ErrInvalidJSONText.GenWithStackByArgs("The document is empty")
 		return
 	}
-	data := hack.Slice(s)
-	if !json.Valid(data) {
-		err = ErrInvalidJSONText.GenWithStackByArgs("The document root must not be followed by other values.")
-		return
-	}
-	if err = bj.UnmarshalJSON(data); err != nil {
+	if err = bj.UnmarshalJSON(hack.Slice(s)); err != nil {
 		err = ErrInvalidJSONText.GenWithStackByArgs(err)
 	}
 	return

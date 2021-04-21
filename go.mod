@@ -3,6 +3,6 @@ module github.com/sjjian/mybatis-mapper-2-sql
 go 1.14
 
 require (
-	github.com/pingcap/parser v0.0.0-20201112065012-c9380f220ff9
-	github.com/pingcap/tidb v1.1.0-beta.0.20201113172225-f9f44d0a492a
+	github.com/pingcap/parser v3.0.12+incompatible
+	github.com/pingcap/tidb v0.0.0-20200312110807-8c4696b3f340 // v3.0.12
 )

@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/pingcap/errors"
-	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/parser/terror"
 )
 
@@ -57,27 +56,8 @@ const (
 	ActionDropView                      ActionType = 24
 	ActionRecoverTable                  ActionType = 25
 	ActionModifySchemaCharsetAndCollate ActionType = 26
-	ActionLockTable                     ActionType = 27
-	ActionUnlockTable                   ActionType = 28
-	ActionRepairTable                   ActionType = 29
-	ActionSetTiFlashReplica             ActionType = 30
-	ActionUpdateTiFlashReplicaStatus    ActionType = 31
 	ActionAddPrimaryKey                 ActionType = 32
 	ActionDropPrimaryKey                ActionType = 33
-	ActionCreateSequence                ActionType = 34
-	ActionAlterSequence                 ActionType = 35
-	ActionDropSequence                  ActionType = 36
-	ActionAddColumns                    ActionType = 37
-	ActionDropColumns                   ActionType = 38
-	ActionModifyTableAutoIdCache        ActionType = 39
-	ActionRebaseAutoRandomBase          ActionType = 40
-	ActionAlterIndexVisibility          ActionType = 41
-	ActionExchangeTablePartition        ActionType = 42
-	ActionAddCheckConstraint            ActionType = 43
-	ActionDropCheckConstraint           ActionType = 44
-	ActionAlterCheckConstraint          ActionType = 45
-	ActionAlterTableAlterPartition      ActionType = 46
-	ActionRenameTables                  ActionType = 47
 )
 
 const (
@@ -113,26 +93,8 @@ var actionMap = map[ActionType]string{
 	ActionDropView:                      "drop view",
 	ActionRecoverTable:                  "recover table",
 	ActionModifySchemaCharsetAndCollate: "modify schema charset and collate",
-	ActionLockTable:                     "lock table",
-	ActionUnlockTable:                   "unlock table",
-	ActionRepairTable:                   "repair table",
-	ActionSetTiFlashReplica:             "set tiflash replica",
-	ActionUpdateTiFlashReplicaStatus:    "update tiflash replica status",
 	ActionAddPrimaryKey:                 AddPrimaryKeyStr,
 	ActionDropPrimaryKey:                "drop primary key",
-	ActionCreateSequence:                "create sequence",
-	ActionAlterSequence:                 "alter sequence",
-	ActionDropSequence:                  "drop sequence",
-	ActionAddColumns:                    "add multi-columns",
-	ActionDropColumns:                   "drop multi-columns",
-	ActionModifyTableAutoIdCache:        "modify auto id cache",
-	ActionRebaseAutoRandomBase:          "rebase auto_random ID",
-	ActionAlterIndexVisibility:          "alter index visibility",
-	ActionExchangeTablePartition:        "exchange partition",
-	ActionAddCheckConstraint:            "add check constraint",
-	ActionDropCheckConstraint:           "drop check constraint",
-	ActionAlterCheckConstraint:          "alter check constraint",
-	ActionAlterTableAlterPartition:      "alter partition",
 }
 
 // String return current ddl action in string
@@ -177,10 +139,6 @@ type DDLReorgMeta struct {
 	// EndHandle is the last handle of the adding indices table.
 	// We should only backfill indices in the range [startHandle, EndHandle].
 	EndHandle int64 `json:"end_handle"`
-
-	SQLMode       mysql.SQLMode                    `json:"sql_mode"`
-	Warnings      map[errors.ErrorID]*terror.Error `json:"warnings"`
-	WarningsCount map[errors.ErrorID]int64         `json:"warnings_count"`
 }
 
 // NewDDLReorgMeta new a DDLReorgMeta.
@@ -192,22 +150,18 @@ func NewDDLReorgMeta() *DDLReorgMeta {
 
 // Job is for a DDL operation.
 type Job struct {
-	ID         int64         `json:"id"`
-	Type       ActionType    `json:"type"`
-	SchemaID   int64         `json:"schema_id"`
-	TableID    int64         `json:"table_id"`
-	SchemaName string        `json:"schema_name"`
-	State      JobState      `json:"state"`
-	Error      *terror.Error `json:"err"`
+	ID       int64         `json:"id"`
+	Type     ActionType    `json:"type"`
+	SchemaID int64         `json:"schema_id"`
+	TableID  int64         `json:"table_id"`
+	State    JobState      `json:"state"`
+	Error    *terror.Error `json:"err"`
 	// ErrorCount will be increased, every time we meet an error when running job.
 	ErrorCount int64 `json:"err_count"`
 	// RowCount means the number of rows that are processed.
-	RowCount int64      `json:"row_count"`
-	Mu       sync.Mutex `json:"-"`
-	// CtxVars are variables attached to the job. It is for internal usage.
-	// E.g. passing arguments between functions by one single *Job pointer.
-	CtxVars []interface{} `json:"-"`
-	Args    []interface{} `json:"-"`
+	RowCount int64         `json:"row_count"`
+	Mu       sync.Mutex    `json:"-"`
+	Args     []interface{} `json:"-"`
 	// RawArgs : We must use json raw message to delay parsing special args.
 	RawArgs     json.RawMessage `json:"raw_args"`
 	SchemaState SchemaState     `json:"schema_state"`
@@ -271,17 +225,6 @@ func (job *Job) GetRowCount() int64 {
 	return job.RowCount
 }
 
-// SetWarnings sets the warnings of rows handled.
-func (job *Job) SetWarnings(warnings map[errors.ErrorID]*terror.Error, warningsCount map[errors.ErrorID]int64) {
-	job.ReorgMeta.Warnings = warnings
-	job.ReorgMeta.WarningsCount = warningsCount
-}
-
-// GetWarnings gets the warnings of the rows handled.
-func (job *Job) GetWarnings() (map[errors.ErrorID]*terror.Error, map[errors.ErrorID]int64) {
-	return job.ReorgMeta.Warnings, job.ReorgMeta.WarningsCount
-}
-
 // Encode encodes job with json format.
 // updateRawArgs is used to determine whether to update the raw args.
 func (job *Job) Encode(updateRawArgs bool) ([]byte, error) {
@@ -310,23 +253,9 @@ func (job *Job) Decode(b []byte) error {
 
 // DecodeArgs decodes job args.
 func (job *Job) DecodeArgs(args ...interface{}) error {
-	var rawArgs []json.RawMessage
-	if err := json.Unmarshal(job.RawArgs, &rawArgs); err != nil {
-		return errors.Trace(err)
-	}
-
-	sz := len(rawArgs)
-	if sz > len(args) {
-		sz = len(args)
-	}
-
-	for i := 0; i < sz; i++ {
-		if err := json.Unmarshal(rawArgs[i], args[i]); err != nil {
-			return errors.Trace(err)
-		}
-	}
-	job.Args = args[:sz]
-	return nil
+	job.Args = args
+	err := json.Unmarshal(job.RawArgs, &job.Args)
+	return errors.Trace(err)
 }
 
 // String implements fmt.Stringer interface.
@@ -470,15 +399,5 @@ type SchemaDiff struct {
 	// OldTableID is the table ID before truncate, only used by truncate table DDL.
 	OldTableID int64 `json:"old_table_id"`
 	// OldSchemaID is the schema ID before rename table, only used by rename table DDL.
-	OldSchemaID int64 `json:"old_schema_id"`
-
-	AffectedOpts []*AffectedOption `json:"affected_options"`
-}
-
-// AffectedOption is used when a ddl affects multi tables.
-type AffectedOption struct {
-	SchemaID    int64 `json:"schema_id"`
-	TableID     int64 `json:"table_id"`
-	OldTableID  int64 `json:"old_table_id"`
 	OldSchemaID int64 `json:"old_schema_id"`
 }

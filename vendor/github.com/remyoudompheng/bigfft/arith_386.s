@@ -7,6 +7,7 @@ TEXT ·addVV(SB),NOSPLIT,$0
 	JMP	math∕big·addVV(SB)
 
 // func subVV(z, x, y []Word) (c Word)
+// (same as addVV except for SBBQ instead of ADCQ and label names)
 TEXT ·subVV(SB),NOSPLIT,$0
 	JMP	math∕big·subVV(SB)
 
@@ -15,6 +16,7 @@ TEXT ·addVW(SB),NOSPLIT,$0
 	JMP	math∕big·addVW(SB)
 
 // func subVW(z, x []Word, y Word) (c Word)
+// (same as addVW except for SUBQ/SBBQ instead of ADDQ/ADCQ and label names)
 TEXT ·subVW(SB),NOSPLIT,$0
 	JMP	math∕big·subVW(SB)
 

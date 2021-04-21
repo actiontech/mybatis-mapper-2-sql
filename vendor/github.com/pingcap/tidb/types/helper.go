@@ -43,11 +43,7 @@ func Round(f float64, dec int) float64 {
 	if math.IsInf(tmp, 0) {
 		return f
 	}
-	result := RoundFloat(tmp) / shift
-	if math.IsNaN(result) {
-		return 0
-	}
-	return result
+	return RoundFloat(tmp) / shift
 }
 
 // Truncate truncates the argument f to dec decimal places.
@@ -103,11 +99,6 @@ func isSpace(c byte) bool {
 
 func isDigit(c byte) bool {
 	return c >= '0' && c <= '9'
-}
-
-// Returns true if the given byte is an ASCII punctuation character (printable and non-alphanumeric).
-func isPunctuation(c byte) bool {
-	return (c >= 0x21 && c <= 0x2F) || (c >= 0x3A && c <= 0x40) || (c >= 0x5B && c <= 0x60) || (c >= 0x7B && c <= 0x7E)
 }
 
 func myMax(a, b int) int {

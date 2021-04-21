@@ -21,9 +21,14 @@ import (
 	"github.com/pingcap/parser/terror"
 )
 
+const (
+	codeCollationCharsetMismatch = terror.ErrCode(mysql.ErrCollationCharsetMismatch)
+	codeUnknownCollation         = terror.ErrCode(mysql.ErrUnknownCollation)
+)
+
 var (
-	ErrUnknownCollation         = terror.ClassDDL.NewStd(mysql.ErrUnknownCollation)
-	ErrCollationCharsetMismatch = terror.ClassDDL.NewStd(mysql.ErrCollationCharsetMismatch)
+	ErrUnknownCollation         = terror.ClassDDL.New(codeUnknownCollation, mysql.MySQLErrName[mysql.ErrUnknownCollation])
+	ErrCollationCharsetMismatch = terror.ClassDDL.New(codeCollationCharsetMismatch, mysql.MySQLErrName[mysql.ErrCollationCharsetMismatch])
 )
 
 // Charset is a charset.
@@ -105,7 +110,11 @@ func ValidCharsetAndCollation(cs string, co string) bool {
 	}
 	co = strings.ToLower(co)
 	_, ok = c.Collations[co]
-	return ok
+	if !ok {
+		return false
+	}
+
+	return true
 }
 
 // GetDefaultCollation returns the default collation for charset.
@@ -174,16 +183,6 @@ func GetCollationByName(name string) (*Collation, error) {
 	if !ok {
 		return nil, ErrUnknownCollation.GenWithStackByArgs(name)
 	}
-	return collation, nil
-}
-
-// GetCollationByID returns collations by given id.
-func GetCollationByID(id int) (*Collation, error) {
-	collation, ok := collationsIDMap[id]
-	if !ok {
-		return nil, errors.Errorf("Unknown collation id %d", id)
-	}
-
 	return collation, nil
 }
 
@@ -431,7 +430,6 @@ var collations = []*Collation{
 	{246, "utf8mb4", "utf8mb4_unicode_520_ci", false},
 	{247, "utf8mb4", "utf8mb4_vietnamese_ci", false},
 	{255, "utf8mb4", "utf8mb4_0900_ai_ci", false},
-	{2048, "utf8mb4", "utf8mb4_zh_pinyin_tidb_as_cs", false},
 }
 
 // init method always puts to the end of file.
@@ -449,7 +447,6 @@ func init() {
 
 	for _, c := range collations {
 		collationsIDMap[c.ID] = c
-		collationsNameMap[c.Name] = c
 
 		if _, ok := supportedCollationNames[c.Name]; ok {
 			supportedCollations = append(supportedCollations, c)
@@ -458,5 +455,9 @@ func init() {
 		if charset, ok := charsets[c.CharsetName]; ok {
 			charset.Collations[c.Name] = c
 		}
+	}
+
+	for id, name := range mysql.Collations {
+		collationsNameMap[name] = collationsIDMap[int(id)]
 	}
 }

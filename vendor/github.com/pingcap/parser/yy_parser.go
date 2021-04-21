@@ -26,38 +26,58 @@ import (
 	"github.com/pingcap/parser/terror"
 )
 
+const (
+	codeErrParse                   = terror.ErrCode(mysql.ErrParse)
+	codeErrSyntax                  = terror.ErrCode(mysql.ErrSyntax)
+	codeErrUnknownCharacterSet     = terror.ErrCode(mysql.ErrUnknownCharacterSet)
+	codeErrInvalidYearColumnLength = terror.ErrCode(mysql.ErrInvalidYearColumnLength)
+	codeWrongArgument              = terror.ErrCode(mysql.ErrWrongArguments)
+	codeWrongFieldTerminators      = terror.ErrCode(mysql.ErrWrongFieldTerminators)
+	codeTooBigDisplayWidth         = terror.ErrCode(mysql.ErrTooBigDisplaywidth)
+	codeErrUnknownAlterLock        = terror.ErrCode(mysql.ErrUnknownAlterLock)
+	codeErrUnknownAlterAlgorithm   = terror.ErrCode(mysql.ErrUnknownAlterAlgorithm)
+)
+
 var (
 	// ErrSyntax returns for sql syntax error.
-	ErrSyntax = terror.ClassParser.NewStd(mysql.ErrSyntax)
+	ErrSyntax = terror.ClassParser.New(codeErrSyntax, mysql.MySQLErrName[mysql.ErrSyntax])
 	// ErrParse returns for sql parse error.
-	ErrParse = terror.ClassParser.NewStd(mysql.ErrParse)
+	ErrParse = terror.ClassParser.New(codeErrParse, mysql.MySQLErrName[mysql.ErrParse])
 	// ErrUnknownCharacterSet returns for no character set found error.
-	ErrUnknownCharacterSet = terror.ClassParser.NewStd(mysql.ErrUnknownCharacterSet)
+	ErrUnknownCharacterSet = terror.ClassParser.New(codeErrUnknownCharacterSet, mysql.MySQLErrName[mysql.ErrUnknownCharacterSet])
 	// ErrInvalidYearColumnLength returns for illegal column length for year type.
-	ErrInvalidYearColumnLength = terror.ClassParser.NewStd(mysql.ErrInvalidYearColumnLength)
+	ErrInvalidYearColumnLength = terror.ClassParser.New(codeErrInvalidYearColumnLength, mysql.MySQLErrName[mysql.ErrInvalidYearColumnLength])
 	// ErrWrongArguments returns for illegal argument.
-	ErrWrongArguments = terror.ClassParser.NewStd(mysql.ErrWrongArguments)
+	ErrWrongArguments = terror.ClassParser.New(codeWrongArgument, mysql.MySQLErrName[mysql.ErrWrongArguments])
 	// ErrWrongFieldTerminators returns for illegal field terminators.
-	ErrWrongFieldTerminators = terror.ClassParser.NewStd(mysql.ErrWrongFieldTerminators)
+	ErrWrongFieldTerminators = terror.ClassParser.New(codeWrongFieldTerminators, mysql.MySQLErrName[mysql.ErrWrongFieldTerminators])
 	// ErrTooBigDisplayWidth returns for data display width exceed limit .
-	ErrTooBigDisplayWidth = terror.ClassParser.NewStd(mysql.ErrTooBigDisplaywidth)
-	// ErrTooBigPrecision returns for data precision exceed limit.
-	ErrTooBigPrecision = terror.ClassParser.NewStd(mysql.ErrTooBigPrecision)
+	ErrTooBigDisplayWidth = terror.ClassParser.New(codeTooBigDisplayWidth, mysql.MySQLErrName[mysql.ErrTooBigDisplaywidth])
 	// ErrUnknownAlterLock returns for no alter lock type found error.
-	ErrUnknownAlterLock = terror.ClassParser.NewStd(mysql.ErrUnknownAlterLock)
+	ErrUnknownAlterLock = terror.ClassParser.New(codeErrUnknownAlterLock, mysql.MySQLErrName[mysql.ErrUnknownAlterLock])
 	// ErrUnknownAlterAlgorithm returns for no alter algorithm found error.
-	ErrUnknownAlterAlgorithm = terror.ClassParser.NewStd(mysql.ErrUnknownAlterAlgorithm)
-	// ErrWrongValue returns for wrong value
-	ErrWrongValue = terror.ClassParser.NewStd(mysql.ErrWrongValue)
-	// ErrWarnDeprecatedSyntaxNoReplacement return when the syntax was deprecated and there is no replacement.
-	ErrWarnDeprecatedSyntaxNoReplacement = terror.ClassParser.NewStd(mysql.ErrWarnDeprecatedSyntaxNoReplacement)
-	// ErrWarnDeprecatedIntegerDisplayWidth share the same code 1681, and it will be returned when length is specified in integer.
-	ErrWarnDeprecatedIntegerDisplayWidth = terror.ClassParser.NewStdErr(mysql.ErrWarnDeprecatedSyntaxNoReplacement, mysql.Message("Integer display width is deprecated and will be removed in a future release.", nil))
+	ErrUnknownAlterAlgorithm = terror.ClassParser.New(codeErrUnknownAlterAlgorithm, mysql.MySQLErrName[mysql.ErrUnknownAlterAlgorithm])
 	// SpecFieldPattern special result field pattern
 	SpecFieldPattern = regexp.MustCompile(`(\/\*!(M?[0-9]{5,6})?|\*\/)`)
+	specCodePattern  = regexp.MustCompile(`\/\*!(M?[0-9]{5,6})?([^*]|\*+[^*/])*\*+\/`)
 	specCodeStart    = regexp.MustCompile(`^\/\*!(M?[0-9]{5,6})?[ \t]*`)
 	specCodeEnd      = regexp.MustCompile(`[ \t]*\*\/$`)
 )
+
+func init() {
+	parserMySQLErrCodes := map[terror.ErrCode]uint16{
+		codeErrSyntax:                  mysql.ErrSyntax,
+		codeErrParse:                   mysql.ErrParse,
+		codeErrUnknownCharacterSet:     mysql.ErrUnknownCharacterSet,
+		codeErrInvalidYearColumnLength: mysql.ErrInvalidYearColumnLength,
+		codeWrongArgument:              mysql.ErrWrongArguments,
+		codeWrongFieldTerminators:      mysql.ErrWrongFieldTerminators,
+		codeTooBigDisplayWidth:         mysql.ErrTooBigDisplaywidth,
+		codeErrUnknownAlterLock:        mysql.ErrUnknownAlterLock,
+		codeErrUnknownAlterAlgorithm:   mysql.ErrUnknownAlterAlgorithm,
+	}
+	terror.ErrClassToMySQLCodes[terror.ClassParser] = parserMySQLErrCodes
+}
 
 // TrimComment trim comment for special comment code of MySQL.
 func TrimComment(txt string) string {
@@ -67,35 +87,23 @@ func TrimComment(txt string) string {
 
 // Parser represents a parser instance. Some temporary objects are stored in it to reduce object allocation during Parse function.
 type Parser struct {
-	charset    string
-	collation  string
-	result     []ast.StmtNode
-	src        string
-	lexer      Scanner
-	hintParser *hintParser
-
-	explicitCharset bool
+	charset   string
+	collation string
+	result    []ast.StmtNode
+	src       string
+	lexer     Scanner
 
 	// the following fields are used by yyParse to reduce allocation.
 	cache  []yySymType
 	yylval yySymType
-	yyVAL  *yySymType
-}
-
-func yySetOffset(yyVAL *yySymType, offset int) {
-	if yyVAL.expr != nil {
-		yyVAL.expr.SetOriginTextPosition(offset)
-	}
-}
-
-func yyhintSetOffset(_ *yyhintSymType, _ int) {
+	yyVAL  yySymType
 }
 
 type stmtTexter interface {
 	stmtText() string
 }
 
-// New returns a Parser object with default SQL mode.
+// New returns a Parser object.
 func New() *Parser {
 	if ast.NewValueExpr == nil ||
 		ast.NewParamMarkerExpr == nil ||
@@ -104,13 +112,9 @@ func New() *Parser {
 		panic("no parser driver (forgotten import?) https://github.com/pingcap/parser/issues/43")
 	}
 
-	p := &Parser{
+	return &Parser{
 		cache: make([]yySymType, 200),
 	}
-	p.EnableWindowFunc(true)
-	mode, _ := mysql.GetSQLMode(mysql.DefaultSQLMode)
-	p.SetSQLMode(mode)
-	return p
 }
 
 // Parse parses a query string to raw ast.StmtNode.
@@ -148,7 +152,11 @@ func (parser *Parser) Parse(sql, charset, collation string) (stmt []ast.StmtNode
 }
 
 func (parser *Parser) lastErrorAsWarn() {
-	parser.lexer.lastErrorAsWarn()
+	if len(parser.lexer.errs) == 0 {
+		return
+	}
+	parser.lexer.warns = append(parser.lexer.warns, parser.lexer.errs[len(parser.lexer.errs)-1])
+	parser.lexer.errs = parser.lexer.errs[:len(parser.lexer.errs)-1]
 }
 
 // ParseOneStmt parses a query and returns an ast.StmtNode.
@@ -187,9 +195,6 @@ func ParseErrorWith(errstr string, lineno int) error {
 // field text was set from its offset to the end of the src string, update
 // the last field text.
 func (parser *Parser) setLastSelectFieldText(st *ast.SelectStmt, lastEnd int) {
-	if st.Kind != ast.SelectStmtKindSelect {
-		return
-	}
 	lastField := st.Fields.Fields[len(st.Fields.Fields)-1]
 	if lastField.Offset+len(lastField.Text()) >= len(parser.src)-1 {
 		lastField.SetText(parser.src[lastField.Offset:lastEnd])
@@ -206,13 +211,6 @@ func (parser *Parser) endOffset(v *yySymType) int {
 		offset--
 	}
 	return offset
-}
-
-func (parser *Parser) parseHint(input string) ([]*ast.TableOptimizerHint, []error) {
-	if parser.hintParser == nil {
-		parser.hintParser = newHintParser()
-	}
-	return parser.hintParser.parse(input, parser.lexer.GetSQLMode(), parser.lexer.lastHintPos)
 }
 
 func toInt(l yyLexer, lval *yySymType, str string) int {
@@ -293,12 +291,4 @@ func getUint64FromNUM(num interface{}) uint64 {
 		return v
 	}
 	return 0
-}
-
-func getInt64FromNUM(num interface{}) (val int64, errMsg string) {
-	switch v := num.(type) {
-	case int64:
-		return v, ""
-	}
-	return -1, fmt.Sprintf("%d is out of range [–9223372036854775808,9223372036854775807]", num)
 }

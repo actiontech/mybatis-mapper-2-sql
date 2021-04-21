@@ -32,8 +32,9 @@ func InitLogger(cfg *Config, opts ...zap.Option) (*zap.Logger, *ZapProperties, e
 		}
 		output = zapcore.AddSync(lg)
 	} else {
-		stdOut, _, err := zap.Open([]string{"stdout"}...)
+		stdOut, close, err := zap.Open([]string{"stdout"}...)
 		if err != nil {
+			close()
 			return nil, nil, err
 		}
 		output = stdOut
@@ -48,7 +49,7 @@ func InitLoggerWithWriteSyncer(cfg *Config, output zapcore.WriteSyncer, opts ...
 	if err != nil {
 		return nil, nil, err
 	}
-	core := NewTextCore(newZapTextEncoder(cfg), output, level)
+	core := NewTextCore(newZapTextEncoder(cfg).(*textEncoder), output, level)
 	opts = append(cfg.buildOptions(output), opts...)
 	lg := zap.New(core, opts...)
 	r := &ZapProperties{
