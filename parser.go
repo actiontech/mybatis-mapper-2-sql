@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/xml"
 	"io"
-	"mybatis_mapper_2_sql/ast"
 	"strings"
+
+	"github.com/sjjian/mybatis-mapper-2-sql/ast"
 )
 
 func ParseXML(data string) (string, error) {

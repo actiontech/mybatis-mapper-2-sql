@@ -64,5 +64,5 @@ func (m *Mapper) GetStmt(ctx *Context) (string, error) {
 		}
 		buff.WriteString("\n")
 	}
-	return buff.String(), nil
+	return strings.TrimSuffix(buff.String(), "\n"), nil
 }

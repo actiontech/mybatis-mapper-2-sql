@@ -508,6 +508,6 @@ func TestParserFullFile(t *testing.T) {
 			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name`=? AND `category`=? AND `price`=? AND `category`=\"apple\";\n"+
 			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `category`=\"apple\" AND (`name`=? OR `name`=?);\n"+
 			"INSERT INTO `fruits` (`name`,`category`,`price`) VALUES (?,?,?),(?,?,?);\n"+
-			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name` LIKE ?;\n",
+			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name` LIKE ?;",
 	)
 }

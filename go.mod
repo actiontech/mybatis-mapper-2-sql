@@ -1,4 +1,4 @@
-module mybatis_mapper_2_sql
+module github.com/sjjian/mybatis-mapper-2-sql
 
 go 1.14
 

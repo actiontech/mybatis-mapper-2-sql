@@ -1,12 +1,13 @@
 package sqlfmt
 
 import (
+	"strings"
+
 	"github.com/pingcap/parser"
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/format"
 	_ "github.com/pingcap/tidb/types/parser_driver"
 	driver "github.com/pingcap/tidb/types/parser_driver"
-	"strings"
 )
 
 func FormatSQL(sql string) string {

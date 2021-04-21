@@ -3,7 +3,8 @@ package ast
 import (
 	"bytes"
 	"encoding/xml"
-	"mybatis_mapper_2_sql/sqlfmt"
+
+	"github.com/sjjian/mybatis-mapper-2-sql/sqlfmt"
 )
 
 type QueryNode struct {
