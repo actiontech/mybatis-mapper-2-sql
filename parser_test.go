@@ -511,3 +511,42 @@ func TestParserFullFile(t *testing.T) {
 			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name` LIKE ?;",
 	)
 }
+
+func TestParseInvalidInput(t *testing.T) {
+	// Parser empty input, return empty output.
+	data, err := ParseXML("")
+	if err != nil {
+		t.Errorf("expect no error, but has error, %s\n", err)
+	}
+	if data != "" {
+		t.Errorf("expect is empty, but data actual is %s\n", data)
+	}
+
+	// XML parser success, but not Mybatis XML, return empty.
+	data, err = ParseXML(`
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<message>
+	<warning>
+		Hello World
+	</warning>
+</message>
+`)
+	if err != nil {
+		t.Errorf("expect no error, but has error, %s\n", err)
+	}
+	if data != "" {
+		t.Errorf("expect is empty, but data actual is %s\n", data)
+	}
+
+	// XML parser fail, return error
+	_, err = ParseXML(`<?xml version="1.0" encoding="UTF-8"?>
+<message>
+    <warning>
+        Hello World
+    <!--missing </warning> -->
+</message>
+`)
+	if err == nil {
+		t.Error("expect has error, but no error")
+	}
+}
