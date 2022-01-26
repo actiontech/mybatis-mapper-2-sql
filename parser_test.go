@@ -550,3 +550,25 @@ func TestParseInvalidInput(t *testing.T) {
 		t.Error("expect has error, but no error")
 	}
 }
+
+// fix issue: https://github.com/actiontech/sqle/issues/189
+func TestParserSQLRefIdNotFound(t *testing.T) {
+	_, err := ParseXML(
+		`
+<mapper namespace="Test">
+	<sql id="someinclude">
+	*
+	</sql>
+	<select id="select" resultType="map">
+		select
+		<include refid="someinclude2" />
+		from t
+	</select>
+</mapper>`)
+	if err == nil {
+		t.Errorf("expect has error, but no error")
+	}
+	if err.Error() != "sql someinclude2 is not exist" {
+		t.Errorf("actual error is [%s]", err.Error())
+	}
+}
