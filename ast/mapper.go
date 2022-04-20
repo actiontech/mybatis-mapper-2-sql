@@ -7,15 +7,22 @@ import (
 	"strings"
 )
 
+const (
+	MapperVersionMyBatis = iota
+	MapperVersionIBatis
+)
+
 type Mapper struct {
+	version        int
 	NameSpace      string
 	SqlNodes       map[string]*SqlNode
 	QueryNodeIndex map[string]*QueryNode
 	QueryNodes     []*QueryNode
 }
 
-func NewMapper() *Mapper {
+func NewMapper(version int) *Mapper {
 	return &Mapper{
+		version:        version,
 		SqlNodes:       map[string]*SqlNode{},
 		QueryNodeIndex: map[string]*QueryNode{},
 		QueryNodes:     []*QueryNode{},
