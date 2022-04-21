@@ -157,6 +157,7 @@ func scanMyBatis(start *xml.StartElement) (ast.Node, error) {
 	return node, nil
 }
 
+// ref: https://ibatis.apache.org/docs/java/pdf/iBATIS-SqlMaps-2_cn.pdf
 func parseIBatis(d *xml.Decoder, start *xml.StartElement) (node ast.Node, err error) {
 	node, err = scanIBatis(start)
 	if err != nil {
