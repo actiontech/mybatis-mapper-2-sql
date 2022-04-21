@@ -256,6 +256,11 @@ func (d *IBatisData) ScanData() error {
 			if err != nil {
 				return err
 			}
+		case '$':
+			err := d.scanVariable()
+			if err != nil {
+				return err
+			}
 		default:
 			err := d.scanValue()
 			if err != nil {
@@ -286,7 +291,28 @@ func (d *IBatisData) scanParam() error {
 	return nil
 }
 
+func (d *IBatisData) scanVariable() error {
+	d.clean()
+	for {
+		r, err := d.read()
+		if err == io.EOF {
+			return fmt.Errorf("data is invalid, not found \"$\" for vaiable")
+		}
+		if err != nil {
+			return err
+		}
+		if r == '$' {
+			break
+		}
+	}
+	data := strings.TrimSuffix(d.tmp.String(), "$")
+	d.Nodes = append(d.Nodes, &Variable{Name: data})
+	d.clean()
+	return nil
+}
+
 func (d *IBatisData) scanValue() error {
+	var end rune
 	for {
 		r, err := d.read()
 		if err == io.EOF { // found end of element
@@ -295,12 +321,13 @@ func (d *IBatisData) scanValue() error {
 		if err != nil {
 			return err
 		}
-		if r == '#' {
+		if r == '#' || r == '$' {
+			end = r
 			d.unRead()
 			break
 		}
 	}
-	data := strings.TrimSuffix(d.tmp.String(), "#")
+	data := strings.TrimSuffix(d.tmp.String(), string([]rune{end}))
 	d.Nodes = append(d.Nodes, Value(data))
 	d.clean()
 	return nil

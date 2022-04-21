@@ -38,13 +38,13 @@ func TestMyBatisScan(t *testing.T) {
 }
 
 func TestIBatisScan(t *testing.T) {
-	d := NewIBatisData([]byte("asd #include_target#asdasd"))
+	d := NewIBatisData([]byte("asd #include_target#$v$asdasd"))
 	err := d.ScanData()
 	if err != nil {
 		t.Errorf("parse error: %v", err)
 		return
 	}
-	if len(d.Nodes) != 3 {
+	if len(d.Nodes) != 4 {
 		t.Errorf("data length is 3, actual is %d", len(d.Nodes))
 		//return
 	}
@@ -59,6 +59,11 @@ func TestIBatisScan(t *testing.T) {
 		return
 	}
 	actual = d.Nodes[2].String()
+	if actual != "$" {
+		t.Errorf("expect data is \"$\", actual is %s", actual)
+		return
+	}
+	actual = d.Nodes[3].String()
 	if actual != "asdasd" {
 		t.Errorf("expect data is \"asdasd\", actual is %s", actual)
 		return
