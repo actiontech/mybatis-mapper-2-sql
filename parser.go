@@ -214,13 +214,15 @@ func scanIBatis(start *xml.StartElement) (ast.Node, error) {
 	switch start.Name.Local {
 	case "sqlMap":
 		node = ast.NewMapper(ast.MapperVersionIBatis)
-	case "select", "update", "delete", "insert":
+	case "sql":
+		node = ast.NewSqlNode()
+	case "include":
+		node = ast.NewIncludeNode()
+	case "select", "update", "delete", "insert", "statement":
 		node = ast.NewQueryNode()
 	case "isEqual", "isNotEqual", "isGreaterThan", "isGreaterEqual", "isLessEqual",
 		"isPropertyAvailable", "isNotPropertyAvailable", "isNull", "isNotNull", "isEmpty", "isNotEmpty":
 		node = ast.NewConditionStmt()
-	case "if":
-		node = ast.NewIfNode()
 	case "dynamic":
 		node = ast.NewDynamicStmt()
 	case "iterate":
