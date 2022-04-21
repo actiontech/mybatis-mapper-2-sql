@@ -128,7 +128,7 @@ func scanMyBatis(start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "mapper":
-		node = ast.NewMapper(ast.MapperVersionMyBatis)
+		node = ast.NewMapper()
 	case "sql":
 		node = ast.NewSqlNode()
 	case "include":
@@ -214,7 +214,7 @@ func scanIBatis(start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "sqlMap":
-		node = ast.NewMapper(ast.MapperVersionIBatis)
+		node = ast.NewMapper()
 	case "sql":
 		node = ast.NewSqlNode()
 	case "include":
