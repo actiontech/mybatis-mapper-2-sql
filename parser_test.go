@@ -832,3 +832,43 @@ func TestParserQueryHasInvalidQueryButSkip(t *testing.T) {
 			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name` LIKE ?",
 		})
 }
+
+func TestIssue302(t *testing.T) {
+	testParserQuery(t, false,
+		`
+<mapper namespace="Test">
+	<select id="selectUserByState" resultType="com.bz.model.entity.User">
+    	SELECT * FROM user    
+		<choose>
+      		<when test="state == 1">
+        		where name = #{name1}
+      		</when>
+      		<otherwise>
+        		where name = #{name2}
+      		</otherwise>
+    	</choose>
+  	</select>
+</mapper>`, []string{
+			"SELECT * FROM `user` WHERE `name`=? AND `name`=?",
+		})
+	testParserQuery(t, false,
+		`
+<mapper namespace="Test">
+	<select id="selectUserByState" resultType="com.bz.model.entity.User">
+    	SELECT * FROM user    
+		<choose>
+      		<when test="state == 1">
+        		where name = #{name1}
+      		</when>
+      		<when test="state == 2">
+        		where name = #{name1}
+      		</when>
+      		<otherwise>
+        		where name = #{name2}
+      		</otherwise>
+    	</choose>
+  	</select>
+</mapper>`, []string{
+			"SELECT * FROM `user` WHERE `name`=? AND `name`=? AND `name`=?",
+		})
+}
