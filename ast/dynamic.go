@@ -70,17 +70,17 @@ func (n *ChooseNode) GetStmt(ctx *Context) (string, error) {
 		// https://github.com/actiontech/sqle/issues/302
 		// In some cases, users like to write XML like:
 		/*
-		<select id="selectUserByState" resultType="com.bz.model.entity.User">
-		    SELECT * FROM user
-		    <choose>
-		        <when test="state == 1">
-		            where name = #{name1}
-		        </when>
-		        <otherwise>
-		            where name = #{name2}
-		        </otherwise>
-		    </choose>
-		</select>
+			<select id="selectUserByState" resultType="com.bz.model.entity.User">
+			    SELECT * FROM user
+			    <choose>
+			        <when test="state == 1">
+			            where name = #{name1}
+			        </when>
+			        <otherwise>
+			            where name = #{name2}
+			        </otherwise>
+			    </choose>
+			</select>
 		*/
 		// parer it as "where name = ? and name = ?".
 		//strings.
@@ -148,14 +148,14 @@ func (n *OtherwiseNode) GetStmt(ctx *Context) (string, error) {
 	// the label <otherwise> may be empty.
 	// <when>
 	/*
-	<when "case 1">
-		case 1
-	</when>
-	<when "case 2">
-		case 2
-	</when>
-	<otherwise> #no default case
-	</otherwise>
+		<when "case 1">
+			case 1
+		</when>
+		<when "case 2">
+			case 2
+		</when>
+		<otherwise> #no default case
+		</otherwise>
 	*/
 	if n.Data != nil {
 		return n.Data.GetStmt(ctx)
