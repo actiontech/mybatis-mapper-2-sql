@@ -872,3 +872,35 @@ func TestIssue302(t *testing.T) {
 			"SELECT * FROM `user` WHERE `name`=? AND `name`=? AND `name`=?",
 		})
 }
+
+func TestParserChoose_issue563(t *testing.T) {
+	testParser(t,
+		`
+<mapper namespace="Test">
+    <select id="testChoose">
+        SELECT
+        name,
+        category,
+        price
+        FROM
+        fruits
+        <where>
+            <choose>
+                <when test="name != null">
+                    AND name = #{name}
+                </when>
+                <when test="category == 'banana'">
+                    AND category = #{category}
+                    <if test="price != null and price !=''">
+                        AND price = ${price}
+                    </if>
+                </when>
+                <otherwise>
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+</mapper>`,
+		"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name`=? AND `category`=? AND `price`=?;",
+	)
+}

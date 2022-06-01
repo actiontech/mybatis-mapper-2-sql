@@ -144,7 +144,23 @@ func (n *OtherwiseNode) AddChildren(ns ...Node) error {
 }
 
 func (n *OtherwiseNode) GetStmt(ctx *Context) (string, error) {
-	return n.Data.GetStmt(ctx)
+	// fix: https://github.com/actiontech/sqle/issues/563
+	// the label <otherwise> may be empty.
+	// <when>
+	/*
+	<when "case 1">
+		case 1
+	</when>
+	<when "case 2">
+		case 2
+	</when>
+	<otherwise> #no default case
+	</otherwise>
+	*/
+	if n.Data != nil {
+		return n.Data.GetStmt(ctx)
+	}
+	return "", nil
 }
 
 type TrimNode struct {
