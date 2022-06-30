@@ -904,3 +904,63 @@ func TestParserChoose_issue563(t *testing.T) {
 		"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name`=? AND `category`=? AND `price`=?;",
 	)
 }
+
+func TestParserChoose_issue639(t *testing.T) {
+	testParser(t,
+		`
+<mapper namespace="Test">
+    <select id="testChoose">
+        SELECT
+        name,
+        category,
+        price
+        FROM
+        fruits
+        <where>
+            <choose>
+                <when test="name != null">
+                    AND name = #{name}
+                </when>
+                <when test="category == 'banana'">
+                    AND category = #{category}
+                    <if test="price != null and price !=''">
+                        AND price = ${price}
+                    </if>
+                </when>
+            </choose>
+        </where>
+    </select>
+</mapper>`,
+		"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name`=? AND `category`=? AND `price`=?;",
+	)
+	testParser(t,
+		`
+<mapper namespace="Test">
+    <select id="testChoose">
+        SELECT
+        name,
+        category,
+        price
+        FROM
+        fruits
+        <where>
+            <choose>
+                <when test="name != null">
+                    AND name = #{name}
+                </when>
+                <when test="category == 'banana'">
+                    AND category = #{category}
+                    <if test="price != null and price !=''">
+                        AND price = ${price}
+                    </if>
+                </when>
+                <otherwise>
+                    AND name = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+</mapper>`,
+		"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name`=? AND `category`=? AND `price`=? AND `name`=1;",
+	)
+}
