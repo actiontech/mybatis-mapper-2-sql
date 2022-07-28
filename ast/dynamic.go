@@ -178,6 +178,7 @@ type TrimNode struct {
 	*ChildrenNode
 	Name            string
 	Prefix          string
+	Suffix          string
 	PrefixOverrides []string
 	SuffixOverrides []string
 }
@@ -201,6 +202,9 @@ func (n *TrimNode) Scan(start *xml.StartElement) error {
 		for _, attr := range start.Attr {
 			if attr.Name.Local == "prefix" {
 				n.Prefix = attr.Value
+			}
+			if attr.Name.Local == "suffix" {
+				n.Suffix = attr.Value
 			}
 			if attr.Name.Local == "prefixOverrides" {
 				n.PrefixOverrides = strings.Split(attr.Value, "|")
@@ -233,6 +237,7 @@ func (n *TrimNode) GetStmt(ctx *Context) (string, error) {
 	buff.WriteString(n.Prefix)
 	buff.WriteString(" ")
 	buff.WriteString(body)
+	buff.WriteString(n.Suffix)
 	return buff.String(), nil
 }
 
