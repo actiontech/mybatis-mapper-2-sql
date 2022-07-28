@@ -964,3 +964,34 @@ func TestParserChoose_issue639(t *testing.T) {
 		"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name`=? AND `category`=? AND `price`=? AND `name`=1;",
 	)
 }
+
+func TestParserTrimSuffix_issue704(t *testing.T) {
+	testParser(t, `
+<mapper namespace="Test">
+	<insert id="insertSelective" parameterType="com.paylabs.merchant.pojo.Agent">
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into agent
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="agentNo != null">
+				agent_no,
+			</if>
+			<if test="agentName != null">
+				agent_name,
+			</if>
+		</trim>
+
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="agentNo != null">
+				#{agentNo,jdbcType=VARCHAR},
+			</if>
+			<if test="agentName != null">
+				#{agentName,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+</mapper>
+`, "INSERT INTO `agent` (`agent_no`,`agent_name`) VALUES (?,?);",
+	)
+}
