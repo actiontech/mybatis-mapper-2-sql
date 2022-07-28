@@ -92,11 +92,11 @@ func (n *ChooseNode) GetStmt(ctx *Context) (string, error) {
 	// https://github.com/actiontech/sqle/issues/639
 	// otherwise can be not defined. so ChooseNode -> Otherwise may be nil.
 	/*
-	<choose>
-		<when test="state == 1">
-			where name = #{name1}
-		</when>
-	</choose>
+		<choose>
+			<when test="state == 1">
+				where name = #{name1}
+			</when>
+		</choose>
 	*/
 	if n.Otherwise != nil {
 		data, err := n.Otherwise.GetStmt(ctx)
