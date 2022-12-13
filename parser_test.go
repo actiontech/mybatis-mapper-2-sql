@@ -995,3 +995,54 @@ func TestParserTrimSuffix_issue704(t *testing.T) {
 `, "INSERT INTO `agent` (`agent_no`,`agent_name`) VALUES (?,?);",
 	)
 }
+
+func TestOtherwise_issue1193(t *testing.T) {
+	testParser(t, `
+<mapper namespace="Test">
+    <select id="testChoose">
+        SELECT
+        *
+        FROM
+        fruits
+        <where>
+            <choose>
+                <when test="name != null">
+                    AND name = #{name}
+                </when>
+                <otherwise>
+                    <if test="price != null and price !=''">
+                        AND price = ${price}
+                    </if>
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+</mapper>
+    `, "SELECT * FROM `fruits` WHERE `name`=? AND `price`=?;",
+	)
+
+	testParser(t, `
+    <mapper namespace="Test">
+        <select id="testChoose">
+            SELECT
+            *
+            FROM
+            fruits
+            <where>
+                <choose>
+                    <when test="name != null">
+                        AND name = #{name}
+                    </when>
+                    <otherwise>
+                        <if test="price != null and price !=''">
+                            AND price = ${price}
+                        </if>
+                        AND category = #{category}
+                    </otherwise>
+                </choose>
+            </where>
+        </select>
+    </mapper>
+        `, "SELECT * FROM `fruits` WHERE `name`=? AND `price`=? AND `category`=?;",
+	)
+}
