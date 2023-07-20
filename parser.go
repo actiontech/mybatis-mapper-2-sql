@@ -20,7 +20,7 @@ func ParseXML(data string) (string, error) {
 	if n == nil {
 		return "", nil
 	}
-	stmt, err := n.GetStmt(ast.NewContext())
+	stmt, err := n.GetStmt(ast.NewContext(&ast.Config{}))
 	if err != nil {
 		return "", err
 	}
@@ -28,8 +28,9 @@ func ParseXML(data string) (string, error) {
 }
 
 // ParseXMLQuery is a parser for parse all query in XML to []string one by one;
-// you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLQuery(data string, skipErrorQuery bool) ([]string, error) {
+// ConfigFn:
+// `SkipErrorQuery` to ignore invalid query.
+func ParseXMLQuery(data string, configFns ...ast.ConfigFn) ([]string, error) {
 	r := strings.NewReader(data)
 	d := xml.NewDecoder(r)
 	n, err := parse(d)
@@ -43,7 +44,13 @@ func ParseXMLQuery(data string, skipErrorQuery bool) ([]string, error) {
 	if !ok {
 		return nil, fmt.Errorf("the mapper is not found")
 	}
-	stmts, err := m.GetStmts(ast.NewContext(), skipErrorQuery)
+
+	config := &ast.Config{}
+	for _, configFn := range configFns {
+		configFn()(config)
+	}
+
+	stmts, err := m.GetStmts(ast.NewContext(config))
 	if err != nil {
 		return nil, err
 	}

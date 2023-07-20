@@ -2,6 +2,8 @@ package parser
 
 import (
 	"testing"
+
+	"github.com/actiontech/mybatis-mapper-2-sql/ast"
 )
 
 func testParser(t *testing.T, xmlData, expect string) {
@@ -574,7 +576,11 @@ func TestParserSQLRefIdNotFound(t *testing.T) {
 }
 
 func testParserQuery(t *testing.T, skipError bool, xmlData string, expect []string) {
-	actual, err := ParseXMLQuery(xmlData, skipError)
+	configFns := []ast.ConfigFn{}
+	if skipError {
+		configFns = append(configFns, SkipErrorQuery)
+	}
+	actual, err := ParseXMLQuery(xmlData, configFns...)
 	if err != nil {
 		t.Errorf("parse error: %v", err)
 		return
@@ -796,7 +802,7 @@ func TestParserQueryHasInvalidQuery(t *testing.T) {
 		<include refid="someinclude2" />
 		from t
 	</select>
-</mapper>`, false)
+</mapper>`)
 	if err == nil {
 		t.Errorf("expect has error, but no error")
 	}
