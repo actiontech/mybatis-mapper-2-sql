@@ -7,3 +7,9 @@ func SkipErrorQuery() func(*ast.Config) {
 		c.SkipErrorQuery = true
 	}
 }
+
+func WithQueryId() func(*ast.Config) {
+	return func(c *ast.Config) {
+		c.WithQueryId = true
+	}
+}

@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 
 	"github.com/actiontech/mybatis-mapper-2-sql/sqlfmt"
 )
@@ -32,6 +33,7 @@ func (s *QueryNode) Scan(start *xml.StartElement) error {
 func (s *QueryNode) GetStmt(ctx *Context) (string, error) {
 	buff := bytes.Buffer{}
 	ctx.QueryType = s.Type
+
 	for _, a := range s.Children {
 		data, err := a.GetStmt(ctx)
 		if err != nil {
@@ -39,5 +41,13 @@ func (s *QueryNode) GetStmt(ctx *Context) (string, error) {
 		}
 		buff.WriteString(data)
 	}
-	return sqlfmt.FormatSQL(buff.String()), nil
+	fmtSQL := sqlfmt.FormatSQL(buff.String())
+	if ctx.Config.WithQueryId {
+		buff.Reset()
+		buff.WriteString(fmt.Sprintf("/* id: %s */\n", s.Id))
+		buff.WriteString(fmtSQL)
+		return buff.String(), nil
+	} else {
+		return fmtSQL, nil
+	}
 }
