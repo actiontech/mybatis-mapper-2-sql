@@ -2,6 +2,8 @@ package parser
 
 import (
 	"testing"
+
+	"github.com/actiontech/mybatis-mapper-2-sql/ast"
 )
 
 func testParser(t *testing.T, xmlData, expect string) {
@@ -573,8 +575,8 @@ func TestParserSQLRefIdNotFound(t *testing.T) {
 	}
 }
 
-func testParserQuery(t *testing.T, skipError bool, xmlData string, expect []string) {
-	actual, err := ParseXMLQuery(xmlData, skipError)
+func testParserQuery(t *testing.T, xmlData string, expect []string, configFns ...ast.ConfigFn) {
+	actual, err := ParseXMLQuery(xmlData, configFns...)
 	if err != nil {
 		t.Errorf("parse error: %v", err)
 		return
@@ -593,7 +595,7 @@ func testParserQuery(t *testing.T, skipError bool, xmlData string, expect []stri
 }
 
 func TestParserQueryFullFile(t *testing.T) {
-	testParserQuery(t, false,
+	testParserQuery(t,
 		`
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
@@ -796,7 +798,7 @@ func TestParserQueryHasInvalidQuery(t *testing.T) {
 		<include refid="someinclude2" />
 		from t
 	</select>
-</mapper>`, false)
+</mapper>`)
 	if err == nil {
 		t.Errorf("expect has error, but no error")
 	}
@@ -806,7 +808,7 @@ func TestParserQueryHasInvalidQuery(t *testing.T) {
 }
 
 func TestParserQueryHasInvalidQueryButSkip(t *testing.T) {
-	testParserQuery(t, true,
+	testParserQuery(t,
 		`
 <mapper namespace="Test">
 	<sql id="someinclude">
@@ -830,11 +832,12 @@ func TestParserQueryHasInvalidQueryButSkip(t *testing.T) {
 	</select>
 </mapper>`, []string{
 			"SELECT `name`,`category`,`price` FROM `fruits` WHERE `name` LIKE ?",
-		})
+		},
+		SkipErrorQuery)
 }
 
 func TestIssue302(t *testing.T) {
-	testParserQuery(t, false,
+	testParserQuery(t,
 		`
 <mapper namespace="Test">
 	<select id="selectUserByState" resultType="com.bz.model.entity.User">
@@ -851,7 +854,7 @@ func TestIssue302(t *testing.T) {
 </mapper>`, []string{
 			"SELECT * FROM `user` WHERE `name`=? AND `name`=?",
 		})
-	testParserQuery(t, false,
+	testParserQuery(t,
 		`
 <mapper namespace="Test">
 	<select id="selectUserByState" resultType="com.bz.model.entity.User">
@@ -1044,5 +1047,100 @@ func TestOtherwise_issue1193(t *testing.T) {
         </select>
     </mapper>
         `, "SELECT * FROM `fruits` WHERE `name`=? AND `price`=? AND `category`=?;",
+	)
+}
+
+func TestWithQueryId_issue1331(t *testing.T) {
+	testParserQuery(t, `
+    <mapper namespace="Test">
+        <select id="testChoose">
+            SELECT
+            *
+            FROM
+            fruits
+            <where>
+                <choose>
+                    <when test="name != null">
+                        AND name = #{name}
+                    </when>
+                    <otherwise>
+                        <if test="price != null and price !=''">
+                            AND price = ${price}
+                        </if>
+                    </otherwise>
+                </choose>
+            </where>
+        </select>
+    </mapper>
+        `, []string{"SELECT * FROM `fruits` WHERE `name`=? AND `price`=?"},
+	)
+	testParserQuery(t, `
+<mapper namespace="Test">
+    <select id="testChoose">
+        SELECT
+        *
+        FROM
+        fruits
+        <where>
+            <choose>
+                <when test="name != null">
+                    AND name = #{name}
+                </when>
+                <otherwise>
+                    <if test="price != null and price !=''">
+                        AND price = ${price}
+                    </if>
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+</mapper>
+    `, []string{"/* id: testChoose */\nSELECT * FROM `fruits` WHERE `name`=? AND `price`=?"},
+		WithQueryId,
+	)
+	testParserQuery(t, `
+    <mapper namespace="Test">
+        <select id="testChoose">
+            SELECT
+            *
+            FROM
+            fruits
+            <where>
+                <choose>
+                    <when test="name != null">
+                        AND name = #{name}
+                    </when>
+                    <otherwise>
+                        <if test="price != null and price !=''">
+                            AND price = ${price}
+                        </if>
+                    </otherwise>
+                </choose>
+            </where>
+        </select>
+        <select id="testChoose2">
+            SELECT
+            *
+            FROM
+            fruits
+            <where>
+                <choose>
+                    <when test="name != null">
+                        AND name = #{name}
+                    </when>
+                    <otherwise>
+                        <if test="price != null and price !=''">
+                            AND price = ${price}
+                        </if>
+                    </otherwise>
+                </choose>
+            </where>
+        </select>
+    </mapper>
+        `, []string{
+		"/* id: testChoose */\nSELECT * FROM `fruits` WHERE `name`=? AND `price`=?",
+		"/* id: testChoose2 */\nSELECT * FROM `fruits` WHERE `name`=? AND `price`=?",
+	},
+		WithQueryId,
 	)
 }

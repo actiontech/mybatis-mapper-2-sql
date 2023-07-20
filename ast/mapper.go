@@ -68,7 +68,7 @@ func (m *Mapper) GetStmt(ctx *Context) (string, error) {
 	return strings.TrimSuffix(buff.String(), "\n"), nil
 }
 
-func (m *Mapper) GetStmts(ctx *Context, skipErrorQuery bool) ([]string, error) {
+func (m *Mapper) GetStmts(ctx *Context) ([]string, error) {
 	var stmts []string
 	ctx.Sqls = m.SqlNodes
 	for _, a := range m.QueryNodes {
@@ -77,7 +77,7 @@ func (m *Mapper) GetStmts(ctx *Context, skipErrorQuery bool) ([]string, error) {
 			stmts = append(stmts, data)
 			continue
 		}
-		if skipErrorQuery {
+		if ctx.Config.SkipErrorQuery {
 			continue
 		}
 		return nil, err

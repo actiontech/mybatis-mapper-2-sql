@@ -52,7 +52,7 @@ id = #id#
 }
 
 func TestParseIBatisInclude(t *testing.T) {
-	testParserQuery(t, false, `<?xml version="1.0" encoding="UTF-8"?>
+	testParserQuery(t, `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
 
 <sqlMap namespace="Employee">
@@ -76,7 +76,7 @@ SELECT id, name
 			"SELECT `id`,`name` FROM `items` WHERE `parentid`=6",
 		})
 
-	testParserQuery(t, false, `<?xml version="1.0" encoding="UTF-8"?>
+	testParserQuery(t, `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
 
 <sqlMap namespace="Employee">
@@ -102,7 +102,7 @@ SELECT id, name
 }
 
 func TestParseIBatisAll(t *testing.T) {
-	testParserQuery(t, true, `
+	testParserQuery(t, `
 <!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
 
 <sqlMap namespace="Employee">
@@ -195,5 +195,6 @@ func TestParseIBatisAll(t *testing.T) {
 		"SELECT * FROM `EMPLOYEE` WHERE (`username`=? OR `username`=?) AND `id` IS NULL AND `id`=?",
 		"SELECT * FROM `EMPLOYEE` WHERE `ACC_FIRST_NAME`=? OR `ACC_LAST_NAME`=? AND `ACC_EMAIL` LIKE ? AND `ACC_ID`=? ORDER BY `ACC_LAST_NAME`",
 		"SELECT * FROM `EMPLOYEE` ORDER BY ?",
-	})
+	},
+		SkipErrorQuery)
 }
