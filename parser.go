@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -25,6 +26,47 @@ func ParseXML(data string) (string, error) {
 		return "", err
 	}
 	return stmt, nil
+}
+
+// ParseXMLs is a parser for parse all query in several XML files to []string one by one;
+// you can set `skipErrorQuery` true to ignore invalid query.
+func ParseXMLs(data []string, skipErrorQuery bool) ([]string, error) {
+	ms := ast.NewMappers()
+	for i := range data {
+		r := strings.NewReader(data[i])
+		d := xml.NewDecoder(r)
+		n, err := parse(d)
+		if err != nil {
+			if skipErrorQuery {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+
+		if n == nil {
+			continue
+		}
+
+		m, ok := n.(*ast.Mapper)
+		if !ok {
+			if skipErrorQuery {
+				continue
+			} else {
+				return nil, errors.New("the mapper is not found")
+			}
+		}
+		err = ms.AddMapper(m)
+		if err != nil && !skipErrorQuery {
+			return nil, fmt.Errorf("add mapper failed: %v", err)
+		}
+	}
+	stmts, err := ms.GetStmts(skipErrorQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmts, nil
 }
 
 // ParseXMLQuery is a parser for parse all query in XML to []string one by one;
@@ -63,7 +105,7 @@ func parse(d *xml.Decoder) (node ast.Node, err error) {
 		if st, ok := t.(xml.StartElement); ok {
 			switch st.Name.Local {
 			case "mapper":
-				return parseMyBatis(d, &st)
+				return parseMyBatis(ast.NewContext(), d, &st)
 			case "sqlMap":
 				return parseIBatis(d, &st)
 			}
@@ -72,8 +114,8 @@ func parse(d *xml.Decoder) (node ast.Node, err error) {
 	return nil, nil
 }
 
-func parseMyBatis(d *xml.Decoder, start *xml.StartElement) (node ast.Node, err error) {
-	node, err = scanMyBatis(start)
+func parseMyBatis(ctx *ast.Context, d *xml.Decoder, start *xml.StartElement) (node ast.Node, err error) {
+	node, err = scanMyBatis(ctx, start)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +130,7 @@ func parseMyBatis(d *xml.Decoder, start *xml.StartElement) (node ast.Node, err e
 
 		switch tt := t.(type) {
 		case xml.StartElement:
-			child, err := parseMyBatis(d, &tt)
+			child, err := parseMyBatis(ctx, d, &tt)
 			if err != nil {
 				return nil, err
 			}
@@ -124,15 +166,15 @@ func parseMyBatis(d *xml.Decoder, start *xml.StartElement) (node ast.Node, err e
 	return node, nil
 }
 
-func scanMyBatis(start *xml.StartElement) (ast.Node, error) {
+func scanMyBatis(ctx *ast.Context, start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "mapper":
-		node = ast.NewMapper()
+		node = ast.NewMapper(ctx)
 	case "sql":
-		node = ast.NewSqlNode()
+		node = ast.NewSqlNode(ctx)
 	case "include":
-		node = ast.NewIncludeNode()
+		node = ast.NewIncludeNode(ctx)
 	case "property":
 		node = ast.NewPropertyNode()
 	case "select", "update", "delete", "insert":
@@ -214,11 +256,11 @@ func scanIBatis(start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "sqlMap":
-		node = ast.NewMapper()
+		node = ast.NewMapper(nil)
 	case "sql":
-		node = ast.NewSqlNode()
+		node = ast.NewSqlNode(nil)
 	case "include":
-		node = ast.NewIncludeNode()
+		node = ast.NewIncludeNode(nil)
 	case "select", "update", "delete", "insert", "statement":
 		node = ast.NewQueryNode()
 	case "isEqual", "isNotEqual", "isGreaterThan", "isGreaterEqual", "isLessEqual",
