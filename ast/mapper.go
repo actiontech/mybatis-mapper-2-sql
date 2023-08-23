@@ -13,18 +13,13 @@ type Mapper struct {
 	SqlNodes       map[string]*SqlNode
 	QueryNodeIndex map[string]*QueryNode
 	QueryNodes     []*QueryNode
-	ctx            *Context
 }
 
-func NewMapper(ctx *Context) *Mapper {
-	if ctx == nil {
-		ctx = NewContext()
-	}
+func NewMapper() *Mapper {
 	return &Mapper{
 		SqlNodes:       map[string]*SqlNode{},
 		QueryNodeIndex: map[string]*QueryNode{},
 		QueryNodes:     []*QueryNode{},
-		ctx:            ctx,
 	}
 }
 
@@ -51,7 +46,6 @@ func (m *Mapper) Scan(start *xml.StartElement) error {
 	for _, attr := range start.Attr {
 		if attr.Name.Local == "namespace" {
 			m.NameSpace = attr.Value
-			m.ctx.Namespace = attr.Value
 		}
 	}
 	return nil

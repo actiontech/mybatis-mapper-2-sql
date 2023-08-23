@@ -9,16 +9,11 @@ import (
 type IncludeNode struct {
 	RefId      DataNode
 	Properties map[string]*PropertyNode
-	namespace  string
 }
 
-func NewIncludeNode(ctx *Context) *IncludeNode {
-	if ctx == nil {
-		ctx = NewContext()
-	}
+func NewIncludeNode() *IncludeNode {
 	return &IncludeNode{
 		Properties: map[string]*PropertyNode{},
-		namespace:  ctx.Namespace,
 	}
 }
 
@@ -68,7 +63,7 @@ func (i *IncludeNode) GetStmt(ctx *Context) (string, error) {
 	case Value:
 		refId = string(it)
 		if !strings.Contains(refId, ".") { // 如果没有"."，认为是没有带namespace，作为查找的key，需要加上
-			refId = fmt.Sprintf("%v.%v", i.namespace, string(it))
+			refId = fmt.Sprintf("%v.%v", ctx.DefaultNamespace, string(it))
 		}
 	case *Variable:
 		variable, ok := ctx.GetVariable(it.Name)

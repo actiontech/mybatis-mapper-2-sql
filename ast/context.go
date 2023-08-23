@@ -1,10 +1,10 @@
 package ast
 
 type Context struct {
-	QueryType string // select, insert, update, delete
-	Variable  map[string]string
-	Sqls      map[string]*SqlNode
-	Namespace string
+	QueryType        string // select, insert, update, delete
+	Variable         map[string]string
+	Sqls             map[string]*SqlNode
+	DefaultNamespace string // namespace of current mapper
 }
 
 func NewContext() *Context {

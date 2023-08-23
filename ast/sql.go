@@ -3,29 +3,23 @@ package ast
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 )
 
 type SqlNode struct {
 	*ChildrenNode
-	Id        string
-	namespace string
+	Id string
 }
 
-func NewSqlNode(ctx *Context) *SqlNode {
-	if ctx == nil {
-		ctx = NewContext()
-	}
-	return &SqlNode{
-		namespace:    ctx.Namespace,
-		ChildrenNode: NewNode(),
-	}
+func NewSqlNode() *SqlNode {
+	n := &SqlNode{}
+	n.ChildrenNode = NewNode()
+	return n
 }
 
 func (s *SqlNode) Scan(start *xml.StartElement) error {
 	for _, attr := range start.Attr {
 		if attr.Name.Local == "id" {
-			s.Id = fmt.Sprintf("%v.%v", s.namespace, attr.Value)
+			s.Id = attr.Value
 		}
 	}
 	return nil

@@ -105,7 +105,7 @@ func parse(d *xml.Decoder) (node ast.Node, err error) {
 		if st, ok := t.(xml.StartElement); ok {
 			switch st.Name.Local {
 			case "mapper":
-				return parseMyBatis(ast.NewContext(), d, &st)
+				return parseMyBatis(d, &st)
 			case "sqlMap":
 				return parseIBatis(d, &st)
 			}
@@ -114,8 +114,8 @@ func parse(d *xml.Decoder) (node ast.Node, err error) {
 	return nil, nil
 }
 
-func parseMyBatis(ctx *ast.Context, d *xml.Decoder, start *xml.StartElement) (node ast.Node, err error) {
-	node, err = scanMyBatis(ctx, start)
+func parseMyBatis(d *xml.Decoder, start *xml.StartElement) (node ast.Node, err error) {
+	node, err = scanMyBatis(start)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func parseMyBatis(ctx *ast.Context, d *xml.Decoder, start *xml.StartElement) (no
 
 		switch tt := t.(type) {
 		case xml.StartElement:
-			child, err := parseMyBatis(ctx, d, &tt)
+			child, err := parseMyBatis(d, &tt)
 			if err != nil {
 				return nil, err
 			}
@@ -166,15 +166,15 @@ func parseMyBatis(ctx *ast.Context, d *xml.Decoder, start *xml.StartElement) (no
 	return node, nil
 }
 
-func scanMyBatis(ctx *ast.Context, start *xml.StartElement) (ast.Node, error) {
+func scanMyBatis(start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "mapper":
-		node = ast.NewMapper(ctx)
+		node = ast.NewMapper()
 	case "sql":
-		node = ast.NewSqlNode(ctx)
+		node = ast.NewSqlNode()
 	case "include":
-		node = ast.NewIncludeNode(ctx)
+		node = ast.NewIncludeNode()
 	case "property":
 		node = ast.NewPropertyNode()
 	case "select", "update", "delete", "insert":
@@ -256,11 +256,11 @@ func scanIBatis(start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "sqlMap":
-		node = ast.NewMapper(nil)
+		node = ast.NewMapper()
 	case "sql":
-		node = ast.NewSqlNode(nil)
+		node = ast.NewSqlNode()
 	case "include":
-		node = ast.NewIncludeNode(nil)
+		node = ast.NewIncludeNode()
 	case "select", "update", "delete", "insert", "statement":
 		node = ast.NewQueryNode()
 	case "isEqual", "isNotEqual", "isGreaterThan", "isGreaterEqual", "isLessEqual",
