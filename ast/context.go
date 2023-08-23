@@ -4,6 +4,7 @@ type Context struct {
 	QueryType string // select, insert, update, delete
 	Variable  map[string]string
 	Sqls      map[string]*SqlNode
+	Namespace string
 }
 
 func NewContext() *Context {

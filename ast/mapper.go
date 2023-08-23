@@ -13,13 +13,18 @@ type Mapper struct {
 	SqlNodes       map[string]*SqlNode
 	QueryNodeIndex map[string]*QueryNode
 	QueryNodes     []*QueryNode
+	ctx            *Context
 }
 
-func NewMapper() *Mapper {
+func NewMapper(ctx *Context) *Mapper {
+	if ctx == nil {
+		ctx = NewContext()
+	}
 	return &Mapper{
 		SqlNodes:       map[string]*SqlNode{},
 		QueryNodeIndex: map[string]*QueryNode{},
 		QueryNodes:     []*QueryNode{},
+		ctx:            ctx,
 	}
 }
 
@@ -46,6 +51,7 @@ func (m *Mapper) Scan(start *xml.StartElement) error {
 	for _, attr := range start.Attr {
 		if attr.Name.Local == "namespace" {
 			m.NameSpace = attr.Value
+			m.ctx.Namespace = attr.Value
 		}
 	}
 	return nil
@@ -70,7 +76,9 @@ func (m *Mapper) GetStmt(ctx *Context) (string, error) {
 
 func (m *Mapper) GetStmts(ctx *Context, skipErrorQuery bool) ([]string, error) {
 	var stmts []string
-	ctx.Sqls = m.SqlNodes
+	if ctx.Sqls == nil {
+		ctx.Sqls = m.SqlNodes
+	}
 	for _, a := range m.QueryNodes {
 		data, err := a.GetStmt(ctx)
 		if err == nil {
