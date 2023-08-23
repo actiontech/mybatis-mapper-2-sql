@@ -2,6 +2,8 @@
 github.com/StackExchange/wmi
 # github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548
 github.com/cznic/mathutil
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
 # github.com/go-ole/go-ole v1.2.1
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
@@ -39,6 +41,8 @@ github.com/pingcap/tidb/util/memory
 # github.com/pingcap/tipb v0.0.0-20191120045257-1b9900292ab6
 github.com/pingcap/tipb/go-tipb
 github.com/pingcap/tipb/sharedbytes
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
 # github.com/remyoudompheng/bigfft v0.0.0-20190512091148-babf20351dd7
 github.com/remyoudompheng/bigfft
 # github.com/shirou/gopsutil v2.18.10+incompatible
@@ -46,6 +50,9 @@ github.com/shirou/gopsutil/internal/common
 github.com/shirou/gopsutil/mem
 # github.com/sirupsen/logrus v1.2.0
 github.com/sirupsen/logrus
+# github.com/stretchr/testify v1.3.0
+## explicit
+github.com/stretchr/testify/assert
 # go.uber.org/atomic v1.3.2
 go.uber.org/atomic
 # go.uber.org/multierr v1.1.0
