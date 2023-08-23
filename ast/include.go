@@ -3,16 +3,22 @@ package ast
 import (
 	"encoding/xml"
 	"fmt"
+	"strings"
 )
 
 type IncludeNode struct {
 	RefId      DataNode
 	Properties map[string]*PropertyNode
+	namespace  string
 }
 
-func NewIncludeNode() *IncludeNode {
+func NewIncludeNode(ctx *Context) *IncludeNode {
+	if ctx == nil {
+		ctx = NewContext()
+	}
 	return &IncludeNode{
 		Properties: map[string]*PropertyNode{},
+		namespace:  ctx.Namespace,
 	}
 }
 
@@ -61,6 +67,9 @@ func (i *IncludeNode) GetStmt(ctx *Context) (string, error) {
 	switch it := i.RefId.(type) {
 	case Value:
 		refId = string(it)
+		if !strings.Contains(refId, ".") { // 如果没有"."，认为是没有带namespace，作为查找的key，需要加上
+			refId = fmt.Sprintf("%v.%v", i.namespace, string(it))
+		}
 	case *Variable:
 		variable, ok := ctx.GetVariable(it.Name)
 		if !ok {
