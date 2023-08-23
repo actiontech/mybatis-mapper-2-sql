@@ -3,7 +3,6 @@ package ast
 import (
 	"encoding/xml"
 	"fmt"
-	"strings"
 )
 
 type IncludeNode struct {
@@ -62,9 +61,6 @@ func (i *IncludeNode) GetStmt(ctx *Context) (string, error) {
 	switch it := i.RefId.(type) {
 	case Value:
 		refId = string(it)
-		if !strings.Contains(refId, ".") { // 如果没有"."，认为是没有带namespace，作为查找的key，需要加上
-			refId = fmt.Sprintf("%v.%v", ctx.DefaultNamespace, string(it))
-		}
 	case *Variable:
 		variable, ok := ctx.GetVariable(it.Name)
 		if !ok {
