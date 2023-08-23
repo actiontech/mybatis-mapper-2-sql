@@ -2,6 +2,8 @@ package parser
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testParser(t *testing.T, xmlData, expect string) {
@@ -1045,4 +1047,63 @@ func TestOtherwise_issue1193(t *testing.T) {
     </mapper>
         `, "SELECT * FROM `fruits` WHERE `name`=? AND `price`=? AND `category`=?;",
 	)
+}
+
+func TestParseXMLs(t *testing.T) {
+	xmlCommonData := `
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Mon Jun 07 09:48:24 CST 2021-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test.common">
+	<sql id="prefix">
+		SELECT * FROM (
+	</sql>
+
+	<sql id="suffix">
+		WHERE a=1 )
+	</sql>
+
+	<select id="sql1" parameterType="customer" resultMap="custResultMap">
+		<include refid="prefix"/>
+		SELECT a,b FROM tb1
+		<include refid="suffix"/>
+	</select>
+</mapper>
+`
+	xmlData := `
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Tue May 10 15:50:21 CST 2022-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="employee">
+  <select id="queryEmpHireSepList" parameterType="employee" resultType="employeeResult">
+	    <include refid="test.common.prefix"/>
+	   	SELECT a,b FROM tb1 
+		<include refid="test.common.suffix"/>
+  </select>
+</mapper>
+`
+
+	sqls, err := ParseXMLs([]string{xmlCommonData, xmlData}, false)
+	if err != nil {
+		if !assert.NoError(t, err) {
+			t.Fatal(err)
+		}
+	}
+	assert.Equal(t, 2, len(sqls))
+	assert.Equal(t, `
+		SELECT * FROM (
+	
+		SELECT a,b FROM tb1
+		
+		WHERE a=1 )
+	`, sqls[0])
+
+	assert.Equal(t, `
+		SELECT * FROM (
+	
+	   	SELECT a,b FROM tb1 
+		
+		WHERE a=1 )
+	`, sqls[1])
+
 }
