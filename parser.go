@@ -76,7 +76,7 @@ type XmlFiles struct {
 
 // ParseXMLsWithFilePath is a parser for parse all query in several XML files to map[string][]string one by one;
 // you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLsWithFilePath(dataFromFiles []XmlFiles, skipErrorQuery bool) (map[string] /*file path*/ []string /*sqls*/, error) {
+func ParseXMLsWithFilePath(dataFromFiles []XmlFiles, skipErrorQuery bool) ([]ast.StmtsInfo, error) {
 	ms := ast.NewMappers()
 	for _, data := range dataFromFiles {
 		r := strings.NewReader(data.Content)

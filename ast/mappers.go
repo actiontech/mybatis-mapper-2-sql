@@ -43,7 +43,12 @@ func (s *Mappers) GetStmts(skipErrorQuery bool) ([]string, error) {
 	return stmts, nil
 }
 
-func (s *Mappers) GetStmtsWithFilePath(skipErrorQuery bool) (map[string] /*file path*/ []string /*sqls*/, error) {
+type StmtsInfo struct {
+	FilePath string
+	SQLs     []string
+}
+
+func (s *Mappers) GetStmtsWithFilePath(skipErrorQuery bool) ([]StmtsInfo, error) {
 	ctx := NewContext()
 	for _, m := range s.mappers {
 		for id, node := range m.SqlNodes {
@@ -51,14 +56,17 @@ func (s *Mappers) GetStmtsWithFilePath(skipErrorQuery bool) (map[string] /*file 
 		}
 	}
 
-	stmts := make(map[string][]string, 0)
+	var stmts []StmtsInfo
 	for _, m := range s.mappers {
 		ctx.DefaultNamespace = m.NameSpace
 		stmt, err := m.GetStmts(ctx, skipErrorQuery)
 		if err != nil {
 			return nil, fmt.Errorf("get sqls from mapper failed, namespace: %v, err: %v", m.NameSpace, err)
 		}
-		stmts[m.FilePath] = append(stmts[m.FilePath], stmt...)
+		stmts = append(stmts, StmtsInfo{
+			FilePath: m.FilePath,
+			SQLs:     stmt,
+		})
 	}
 	return stmts, nil
 }
