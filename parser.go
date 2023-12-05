@@ -28,57 +28,16 @@ func ParseXML(data string) (string, error) {
 	return stmt, nil
 }
 
-// ParseXMLs is a parser for parse all query in several XML files to []string one by one;
-// you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLs(data []string, skipErrorQuery bool) ([]string, error) {
-	ms := ast.NewMappers()
-	for i := range data {
-		r := strings.NewReader(data[i])
-		d := xml.NewDecoder(r)
-		n, err := parse(d)
-		if err != nil {
-			if skipErrorQuery {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-
-		if n == nil {
-			continue
-		}
-
-		m, ok := n.(*ast.Mapper)
-		if !ok {
-			if skipErrorQuery {
-				continue
-			} else {
-				return nil, errors.New("the mapper is not found")
-			}
-		}
-		err = ms.AddMapper(m)
-		if err != nil && !skipErrorQuery {
-			return nil, fmt.Errorf("add mapper failed: %v", err)
-		}
-	}
-	stmts, err := ms.GetStmts(skipErrorQuery)
-	if err != nil {
-		return nil, err
-	}
-
-	return stmts, nil
-}
-
-type XmlFiles struct {
+type XmlFile struct {
 	FilePath string
 	Content  string
 }
 
-// ParseXMLsWithFilePath is a parser for parse all query in several XML files to map[string][]string one by one;
+// ParseXMLs is a parser for parse all query in several XML files to []ast.StmtInfo one by one;
 // you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLsWithFilePath(dataFromFiles []XmlFiles, skipErrorQuery bool) ([]ast.StmtsInfo, error) {
+func ParseXMLs(data []XmlFile, skipErrorQuery bool) ([]ast.StmtInfo, error) {
 	ms := ast.NewMappers()
-	for _, data := range dataFromFiles {
+	for _, data := range data {
 		r := strings.NewReader(data.Content)
 		d := xml.NewDecoder(r)
 		n, err := parse(d)
@@ -108,7 +67,7 @@ func ParseXMLsWithFilePath(dataFromFiles []XmlFiles, skipErrorQuery bool) ([]ast
 			return nil, fmt.Errorf("add mapper failed: %v", err)
 		}
 	}
-	stmts, err := ms.GetStmtsWithFilePath(skipErrorQuery)
+	stmts, err := ms.GetStmts(skipErrorQuery)
 	if err != nil {
 		return nil, err
 	}
