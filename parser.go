@@ -213,7 +213,7 @@ func scanMyBatis(d *xml.Decoder, start *xml.StartElement) (ast.Node, error) {
 }
 
 func parseApStack(d *xml.Decoder, start *xml.StartElement) (node ast.Node, err error) {
-	node, err = scanApStack(start)
+	node, err = scanApStack(d, start)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +344,7 @@ func scanIBatis(d *xml.Decoder, start *xml.StartElement) (ast.Node, error) {
 	return node, nil
 }
 
-func scanApStack(start *xml.StartElement) (ast.Node, error) {
+func scanApStack(d *xml.Decoder, start *xml.StartElement) (ast.Node, error) {
 	var node ast.Node
 	switch start.Name.Local {
 	case "sqlMap", "sqls":
@@ -354,7 +354,8 @@ func scanApStack(start *xml.StartElement) (ast.Node, error) {
 	case "include":
 		node = ast.NewIncludeNode()
 	case "select", "update", "delete", "insert", "statement", "dynamicSelect", "dynamicDelete", "dynamicUpdate":
-		node = ast.NewQueryNode()
+		startLine, _ := d.InputPos()
+		node = ast.NewQueryNode(uint64(startLine))
 	case "isEqual", "isNotEqual", "isGreaterThan", "isGreaterEqual", "isLessEqual",
 		"isPropertyAvailable", "isNotPropertyAvailable", "isNull", "isNotNull", "isEmpty", "isNotEmpty":
 		node = ast.NewConditionStmt()
