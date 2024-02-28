@@ -7,7 +7,13 @@ func TestDynamicSQL(t *testing.T) {
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <sqls id="Bc" longname="批量SQL" package="cn.tt"
       xsi:noNamespaceSchemaLocation="ltts-model.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <dynamicSelect cache="none" method="selectAll" type="sql" id="test1" longname="test">
+	<procedure method="normal" id="Make_Daily" longname="test1">
+        <sql type="oracle"><![CDATA[call sqle.users(#acctdt#,#erorcd#,#errmsg#)]]></sql>
+    </procedure>
+	<procedure method="normal" id="Backup_Hist" longname="test2">
+        <sql type="oracle"><![CDATA[call sqle.workflows(#acctdt#,#erorcd#,#errmsg#)]]></sql>
+    </procedure>
+	<dynamicSelect cache="none" method="selectAll" type="sql" id="test1" longname="test">
         <dynamicSql type="mysql">
             <str type="Str"><![CDATA[
     	select tranno from rps_errr_detl where ckdate = #ckdate# and hadres in (3,7)
@@ -54,6 +60,8 @@ func TestDynamicSQL(t *testing.T) {
 </sqls>
 
 `, []string{
+		"call sqle.users(?,?,?)",
+		"call sqle.workflows(?,?,?)",
 		"SELECT `tranno` FROM `rps_errr_detl` WHERE `ckdate`=? AND `hadres` IN (3,7)",
 		"UPDATE `rps_mesg_push` AS `p` SET `p`.`msgsta`=4, `p`.`gmt_modified`=now(6) WHERE `p`.`msgsta` IN (1,3) AND `p`.`temcod`=?",
 		" delete from ?  WHERE id between ? and ? limit ?",
