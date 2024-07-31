@@ -7,12 +7,14 @@ type Context struct {
 	Variable         map[string]string
 	Sqls             map[string]*SqlNode
 	DefaultNamespace string // namespace of current mapper
+	Config           *Config
 }
 
-func NewContext() *Context {
+func NewContext(config *Config) *Context {
 	return &Context{
 		Variable: map[string]string{},
 		Sqls:     map[string]*SqlNode{},
+		Config:   config,
 	}
 }
 
@@ -33,4 +35,9 @@ func (c *Context) GetSql(k string) (*SqlNode, bool) {
 	// 当存在跨namespace引用时，需要通过namespace区分引用的SQL id
 	sql, ok = c.Sqls[fmt.Sprintf("%v.%v", c.DefaultNamespace, k)]
 	return sql, ok
+}
+
+type Config struct {
+	SkipErrorQuery bool
+	RestoreSqlFlag uint64
 }
