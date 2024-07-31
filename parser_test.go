@@ -3,6 +3,8 @@ package parser
 import (
 	"testing"
 
+	"github.com/actiontech/mybatis-mapper-2-sql/ast"
+	"github.com/pingcap/parser/format"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -576,7 +578,7 @@ func TestParserSQLRefIdNotFound(t *testing.T) {
 }
 
 func testParserQuery(t *testing.T, skipError bool, xmlData string, expect []string) {
-	actual, err := ParseXMLQuery(xmlData, skipError)
+	actual, err := ParseXMLQuery(xmlData, &ast.Config{SkipErrorQuery: skipError})
 	if err != nil {
 		t.Errorf("parse error: %v", err)
 		return
@@ -798,7 +800,7 @@ func TestParserQueryHasInvalidQuery(t *testing.T) {
 		<include refid="someinclude2" />
 		from t
 	</select>
-</mapper>`, false)
+</mapper>`, &ast.Config{SkipErrorQuery: false})
 	if err == nil {
 		t.Errorf("expect has error, but no error")
 	}
@@ -1079,7 +1081,7 @@ func TestParseXMLs(t *testing.T) {
 
 	stmtInfos, err := ParseXMLs([]XmlFile{
 		{Content: content, FilePath: "./test/test.xml"},
-	}, false)
+	}, &ast.Config{SkipErrorQuery: false})
 	if err != nil {
 		if !assert.NoError(t, err) {
 			t.Fatal(err)
@@ -1089,4 +1091,61 @@ func TestParseXMLs(t *testing.T) {
 	assert.Equal(t, "\n        SELECT * FROM (\n    \n        SELECT a,b FROM tb1\n        \n        WHERE a=1 )\n    ", stmtInfos[0].SQL)
 
 	assert.Equal(t, "\n        SELECT * FROM (\n    \n        SELECT a,b FROM tb1\n        \n        WHERE a=1 )\n    ", stmtInfos[1].SQL)
+}
+
+func TestParser_issue2356(t *testing.T) {
+	content := `
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.UserMapper">
+    <resultMap id="userResultMap" type="com.example.domain.User">
+        <id property="id" column="user_id" />
+        <result property="username" column="username" />
+        <result property="email" column="email" />
+    </resultMap>
+
+    <!-- 插入语句 -->
+    <insert id="insertUser" parameterType="com.example.domain.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (username, email)
+        VALUES (#{username}, #{email})
+    </insert>
+
+    <!-- 更新语句 -->
+    <update id="updateUser" parameterType="com.example.domain.User">
+        UPDATE users
+        SET username = #{username}, email = #{email}
+        WHERE user_id = #{id} and delete_at='2023-02-01'
+    </update>
+
+    <!-- 查询语句 -->
+    <select id="selectUser" parameterType="int" resultMap="userResultMap">
+        SELECT user_id, username, email
+        FROM users
+        WHERE user_id = #{id}
+    </select>
+
+    <!-- 删除语句 -->
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM users
+        WHERE user_id = #{id}
+    </delete>
+
+</mapper>
+    `
+
+	stmtInfos, err := ParseXMLs([]XmlFile{
+		{Content: content, FilePath: "./test/test.xml"},
+	}, &ast.Config{SkipErrorQuery: true, RestoreSqlFlag: uint64(format.RestoreNameDoubleQuotes | format.RestoreStringSingleQuotes)})
+	if err != nil {
+		if !assert.NoError(t, err) {
+			t.Fatal(err)
+		}
+	}
+	assert.Equal(t, 4, len(stmtInfos))
+	assert.Equal(t, "INSERT INTO \"users\" (\"username\",\"email\") VALUES (?,?)", stmtInfos[0].SQL)
+	assert.Equal(t, "UPDATE \"users\" SET \"username\"=?, \"email\"=? WHERE \"user_id\"=? AND \"delete_at\"='2023-02-01'", stmtInfos[1].SQL)
+	assert.Equal(t, "SELECT \"user_id\",\"username\",\"email\" FROM \"users\" WHERE \"user_id\"=?", stmtInfos[2].SQL)
+	assert.Equal(t, "DELETE FROM \"users\" WHERE \"user_id\"=?", stmtInfos[3].SQL)
 }
