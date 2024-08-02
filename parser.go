@@ -35,7 +35,12 @@ type XmlFile struct {
 
 // ParseXMLs is a parser for parse all query in several XML files to []ast.StmtInfo one by one;
 // you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLs(data []XmlFile, config *ast.Config) ([]ast.StmtInfo, error) {
+func ParseXMLs(data []XmlFile, configFns ...ast.ConfigFn) ([]ast.StmtInfo, error) {
+	config := &ast.Config{}
+	for _, configFn := range configFns {
+		configFn()(config)
+	}
+
 	ms := ast.NewMappers()
 	for _, data := range data {
 		r := strings.NewReader(data.Content)
@@ -77,7 +82,7 @@ func ParseXMLs(data []XmlFile, config *ast.Config) ([]ast.StmtInfo, error) {
 
 // ParseXMLQuery is a parser for parse all query in XML to []string one by one;
 // you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLQuery(data string, config *ast.Config) ([]string, error) {
+func ParseXMLQuery(data string, configFns ...ast.ConfigFn) ([]string, error) {
 	r := strings.NewReader(data)
 	d := xml.NewDecoder(r)
 	n, err := parse(d)
@@ -87,6 +92,11 @@ func ParseXMLQuery(data string, config *ast.Config) ([]string, error) {
 	if n == nil {
 		return nil, nil
 	}
+	config := &ast.Config{}
+	for _, configFn := range configFns {
+		configFn()(config)
+	}
+
 	m, ok := n.(*ast.Mapper)
 	if !ok {
 		return nil, fmt.Errorf("the mapper is not found")

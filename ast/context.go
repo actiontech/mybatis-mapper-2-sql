@@ -1,6 +1,10 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pingcap/parser/format"
+)
 
 type Context struct {
 	QueryType        string // select, insert, update, delete
@@ -39,5 +43,7 @@ func (c *Context) GetSql(k string) (*SqlNode, bool) {
 
 type Config struct {
 	SkipErrorQuery bool
-	RestoreSqlFlag uint64
+	RestoreSqlFlag format.RestoreFlags
 }
+
+type ConfigFn func() func(*Config)
