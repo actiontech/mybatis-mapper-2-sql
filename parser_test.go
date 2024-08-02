@@ -3,8 +3,6 @@ package parser
 import (
 	"testing"
 
-	"github.com/actiontech/mybatis-mapper-2-sql/ast"
-	"github.com/pingcap/parser/format"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -578,7 +576,7 @@ func TestParserSQLRefIdNotFound(t *testing.T) {
 }
 
 func testParserQuery(t *testing.T, skipError bool, xmlData string, expect []string) {
-	actual, err := ParseXMLQuery(xmlData, &ast.Config{SkipErrorQuery: skipError})
+	actual, err := ParseXMLQuery(xmlData, SkipErrorQuery)
 	if err != nil {
 		t.Errorf("parse error: %v", err)
 		return
@@ -800,7 +798,7 @@ func TestParserQueryHasInvalidQuery(t *testing.T) {
 		<include refid="someinclude2" />
 		from t
 	</select>
-</mapper>`, &ast.Config{SkipErrorQuery: false})
+</mapper>`)
 	if err == nil {
 		t.Errorf("expect has error, but no error")
 	}
@@ -1081,7 +1079,7 @@ func TestParseXMLs(t *testing.T) {
 
 	stmtInfos, err := ParseXMLs([]XmlFile{
 		{Content: content, FilePath: "./test/test.xml"},
-	}, &ast.Config{SkipErrorQuery: false})
+	}, SkipErrorQuery)
 	if err != nil {
 		if !assert.NoError(t, err) {
 			t.Fatal(err)
@@ -1137,7 +1135,7 @@ func TestParser_issue2356(t *testing.T) {
 
 	stmtInfos, err := ParseXMLs([]XmlFile{
 		{Content: content, FilePath: "./test/test.xml"},
-	}, &ast.Config{SkipErrorQuery: true, RestoreSqlFlag: uint64(format.RestoreNameDoubleQuotes | format.RestoreStringSingleQuotes)})
+	}, PgRestoreSqlFlag)
 	if err != nil {
 		if !assert.NoError(t, err) {
 			t.Fatal(err)
