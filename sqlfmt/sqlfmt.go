@@ -10,13 +10,13 @@ import (
 	driver "github.com/pingcap/tidb/types/parser_driver"
 )
 
-func FormatSQL(sql string, restoreFlag format.RestoreFlags) string {
+func FormatSQL(sql string) string {
 	node, err := ParseOneSql(sql)
 	if err != nil {
 		return sql
 	}
 	node.Accept(&FormatVisitor{})
-	f, err := RestoreToSqlWithFlag(restoreFlag, node)
+	f, err := RestoreToSqlWithFlag(format.RestoreNameBackQuotes|format.RestoreStringDoubleQuotes, node)
 	if err != nil {
 		return sql
 	}

@@ -2,7 +2,6 @@ package parser
 
 import (
 	"github.com/actiontech/mybatis-mapper-2-sql/ast"
-	"github.com/pingcap/parser/format"
 )
 
 func SkipErrorQuery() func(*ast.Config) {
@@ -11,8 +10,8 @@ func SkipErrorQuery() func(*ast.Config) {
 	}
 }
 
-func PgRestoreSqlFlag() func(*ast.Config) {
+func RestoreOriginSql() func(*ast.Config) {
 	return func(c *ast.Config) {
-		c.RestoreSqlFlag = format.RestoreNameDoubleQuotes | format.RestoreStringSingleQuotes
+		c.RestoreOriginSql = true
 	}
 }

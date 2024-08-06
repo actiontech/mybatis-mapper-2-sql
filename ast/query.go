@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/xml"
 
-	"github.com/pingcap/parser/format"
 	"github.com/actiontech/mybatis-mapper-2-sql/sqlfmt"
 )
 
@@ -43,9 +42,8 @@ func (s *QueryNode) GetStmt(ctx *Context) (string, error) {
 		}
 		buff.WriteString(data)
 	}
-	flag := format.RestoreNameBackQuotes|format.RestoreStringDoubleQuotes
-	if ctx.Config != nil && ctx.Config.RestoreSqlFlag != 0 {
-		flag = format.RestoreFlags(ctx.Config.RestoreSqlFlag)
+	if ctx.Config.RestoreOriginSql {
+		return buff.String(), nil
 	}
-	return sqlfmt.FormatSQL(buff.String(), flag), nil
+	return sqlfmt.FormatSQL(buff.String()), nil
 }
