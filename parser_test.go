@@ -1135,15 +1135,15 @@ func TestParser_issue2356(t *testing.T) {
 
 	stmtInfos, err := ParseXMLs([]XmlFile{
 		{Content: content, FilePath: "./test/test.xml"},
-	}, PgRestoreSqlFlag)
+	}, RestoreOriginSql)
 	if err != nil {
 		if !assert.NoError(t, err) {
 			t.Fatal(err)
 		}
 	}
 	assert.Equal(t, 4, len(stmtInfos))
-	assert.Equal(t, "INSERT INTO \"users\" (\"username\",\"email\") VALUES (?,?)", stmtInfos[0].SQL)
-	assert.Equal(t, "UPDATE \"users\" SET \"username\"=?, \"email\"=? WHERE \"user_id\"=? AND \"delete_at\"='2023-02-01'", stmtInfos[1].SQL)
-	assert.Equal(t, "SELECT \"user_id\",\"username\",\"email\" FROM \"users\" WHERE \"user_id\"=?", stmtInfos[2].SQL)
-	assert.Equal(t, "DELETE FROM \"users\" WHERE \"user_id\"=?", stmtInfos[3].SQL)
+	assert.Equal(t, "\n        INSERT INTO users (username, email)\n        VALUES (?, ?)\n    ", stmtInfos[0].SQL)
+	assert.Equal(t, "\n        UPDATE users\n        SET username = ?, email = ?\n        WHERE user_id = ? and delete_at='2023-02-01'\n    ", stmtInfos[1].SQL)
+	assert.Equal(t, "\n        SELECT user_id, username, email\n        FROM users\n        WHERE user_id = ?\n    ", stmtInfos[2].SQL)
+	assert.Equal(t, "\n        DELETE FROM users\n        WHERE user_id = ?\n    ", stmtInfos[3].SQL)
 }
