@@ -21,7 +21,7 @@ func ParseXML(data string) (string, error) {
 	if n == nil {
 		return "", nil
 	}
-	stmt, err := n.GetStmt(ast.NewContext())
+	stmt, err := n.GetStmt(ast.NewContext(&ast.Config{}))
 	if err != nil {
 		return "", err
 	}
@@ -35,14 +35,19 @@ type XmlFile struct {
 
 // ParseXMLs is a parser for parse all query in several XML files to []ast.StmtInfo one by one;
 // you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLs(data []XmlFile, skipErrorQuery bool) ([]ast.StmtInfo, error) {
+func ParseXMLs(data []XmlFile, configFns ...ast.ConfigFn) ([]ast.StmtInfo, error) {
+	config := &ast.Config{}
+	for _, configFn := range configFns {
+		configFn()(config)
+	}
+
 	ms := ast.NewMappers()
 	for _, data := range data {
 		r := strings.NewReader(data.Content)
 		d := xml.NewDecoder(r)
 		n, err := parse(d)
 		if err != nil {
-			if skipErrorQuery {
+			if config.SkipErrorQuery {
 				continue
 			} else {
 				return nil, err
@@ -55,7 +60,7 @@ func ParseXMLs(data []XmlFile, skipErrorQuery bool) ([]ast.StmtInfo, error) {
 
 		m, ok := n.(*ast.Mapper)
 		if !ok {
-			if skipErrorQuery {
+			if config.SkipErrorQuery {
 				continue
 			} else {
 				return nil, errors.New("the mapper is not found")
@@ -63,11 +68,11 @@ func ParseXMLs(data []XmlFile, skipErrorQuery bool) ([]ast.StmtInfo, error) {
 		}
 		m.FilePath = data.FilePath
 		err = ms.AddMapper(m)
-		if err != nil && !skipErrorQuery {
+		if err != nil && !config.SkipErrorQuery {
 			return nil, fmt.Errorf("add mapper failed: %v", err)
 		}
 	}
-	stmts, err := ms.GetStmts(skipErrorQuery)
+	stmts, err := ms.GetStmts(*ast.NewContext(config))
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +82,7 @@ func ParseXMLs(data []XmlFile, skipErrorQuery bool) ([]ast.StmtInfo, error) {
 
 // ParseXMLQuery is a parser for parse all query in XML to []string one by one;
 // you can set `skipErrorQuery` true to ignore invalid query.
-func ParseXMLQuery(data string, skipErrorQuery bool) ([]string, error) {
+func ParseXMLQuery(data string, configFns ...ast.ConfigFn) ([]string, error) {
 	r := strings.NewReader(data)
 	d := xml.NewDecoder(r)
 	n, err := parse(d)
@@ -87,11 +92,16 @@ func ParseXMLQuery(data string, skipErrorQuery bool) ([]string, error) {
 	if n == nil {
 		return nil, nil
 	}
+	config := &ast.Config{}
+	for _, configFn := range configFns {
+		configFn()(config)
+	}
+
 	m, ok := n.(*ast.Mapper)
 	if !ok {
 		return nil, fmt.Errorf("the mapper is not found")
 	}
-	stmts, err := m.GetStmts(ast.NewContext(), skipErrorQuery)
+	stmts, err := m.GetStmts(ast.NewContext(config))
 	if err != nil {
 		return nil, err
 	}
