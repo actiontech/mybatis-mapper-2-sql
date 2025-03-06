@@ -32,7 +32,7 @@ func (c *Context) SetVariable(k, v string) {
 
 func (c *Context) GetSql(k string) (*SqlNode, bool) {
 	// 这里的key某些xml在带有全限定名的时候需要去掉, 避免找不到SQL
-	k, _ = strings.CutPrefix(k, c.DefaultNamespace+".")
+	k = c.CutKeyDefaultNameSpace(k)
 	sql, ok := c.Sqls[k]
 	if ok {
 		return sql, true
@@ -45,6 +45,11 @@ func (c *Context) GetSql(k string) (*SqlNode, bool) {
 type Config struct {
 	SkipErrorQuery   bool
 	RestoreOriginSql bool
+}
+
+func (c *Context) CutKeyDefaultNameSpace(key string) string {
+	afterKey, _ := strings.CutPrefix(key, c.DefaultNamespace+".")
+	return afterKey
 }
 
 type ConfigFn func() func(*Config)
