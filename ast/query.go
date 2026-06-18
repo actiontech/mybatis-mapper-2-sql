@@ -40,7 +40,7 @@ func (s *QueryNode) GetStmt(ctx *Context) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		buff.WriteString(data)
+		appendSQLFragment(&buff, data)
 	}
 	if ctx.Config != nil && ctx.Config.RestoreOriginSql {
 		return buff.String(), nil
