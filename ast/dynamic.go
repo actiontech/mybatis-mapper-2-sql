@@ -192,7 +192,7 @@ func (n *TrimNode) GetStmt(ctx *Context) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		buff.WriteString(data)
+		appendSQLFragment(&buff, data)
 	}
 	body := strings.TrimSpace(buff.String())
 	for _, po := range n.PrefixOverrides {

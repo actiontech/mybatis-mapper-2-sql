@@ -33,7 +33,7 @@ func (n *ChildrenNode) GetStmt(ctx *Context) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		buff.WriteString(data)
+		appendSQLFragment(&buff, data)
 	}
 	return buff.String(), nil
 }

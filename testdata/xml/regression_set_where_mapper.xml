@@ -1,0 +1,1391 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatientity.org//DTD Mapper 3.0//EN"
+        "http://mybatientity.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.SampleRecordPo">
+    <resultMap id="BaseResultMap" type="com.example.mapper.SampleRecordPo">
+        <result column="owner_id" property="ownerId"/>
+        <result column="record_id" property="recordId"/>
+        <result column="record_type" property="recordType"/>
+        <result column="record_type_name" property="recordTypeName"/>
+        <result column="cancel_check_flag" property="cancelCheckFlag"/>
+        <result column="is_primary_flag" property="isPrimaryFlag"/>
+        <result column="source_flag" property="sourceFlag"/>
+        <result column="curr" property="curr"/>
+        <result column="account_no" property="accountNo"/>
+        <result column="account_name" property="accountName"/>
+        <result column="account_type" property="accountType"/>
+        <result column="open_branch_no" property="openBranchNo"/>
+        <result column="open_branch_name" property="openBranchName"/>
+        <result column="channel_id" property="channelId"/>
+        <result column="sign_branch_no" property="signBranchNo"/>
+        <result column="record_status" property="recordStatus"/>
+        <result column="signed_at" property="signedAt"/>
+        <result column="cancelled_at" property="cancelledAt"/>
+        <result column="cancel_flag" property="cancelFlag"/>
+        <result column="cancel_operator_id" property="cancelOperatorId"/>
+        <result column="cancel_operator_name" property="cancelOperatorName"/>
+        <result column="effective_date" property="effectiveDate"/>
+        <result column="expired_date" property="expiredDate"/>
+        <result column="migrate_flag" property="migrateFlag"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="branch_no" property="branchNo"/>
+        <result column="operator_no" property="operatorNo"/>
+        <result column="related_owner_id" property="relatedOwnerId"/>
+        <result column="related_account_no" property="relatedAccountNo"/>
+        <result column="related_seq_no" property="relatedSeqNo"/>
+        <result column="device_id" property="deviceId" />
+        <result column="extField1" property="extField1"/>
+        <result column="extField2" property="extField2"/>
+        <result column="extField3" property="extField3"/>
+        <result column="extField4" property="extField4"/>
+        <result column="extField5" property="extField5"/>
+        <result column="extField6" property="extField6"/>
+    </resultMap>
+
+    <sql id="Table_Name">
+        t_sample_record
+    </sql>
+
+    <sql id="Base_Column">
+        owner_id,
+        record_id,
+        record_type,
+        record_type_name,
+        cancel_check_flag,
+        is_primary_flag,
+        source_flag,
+        curr,
+        account_no,
+        account_name,
+        account_type,
+        open_branch_no,
+        open_branch_name,
+        channel_id,
+        sign_branch_no,
+        record_status,
+        signed_at,
+        cancelled_at,
+        cancel_flag,
+        cancel_operator_id,
+        cancel_operator_name,
+        effective_date,
+        expired_date,
+        migrate_flag,
+        updated_at,
+        branch_no,
+        operator_no,
+        related_owner_id,
+        related_account_no,
+        related_seq_no,
+        device_id,
+        extField1,
+        extField2,
+        extField3,
+        extField4,
+        extField5,
+        extField6
+    </sql>
+
+    <sql id="Base_Where">
+        <trim suffixOverrides="AND">
+            <if test="ownerId != null">
+                owner_id= #{ownerId}
+                AND
+            </if>
+            <if test="recordId != null">
+                record_id= #{recordId}
+                AND
+            </if>
+            <if test="recordType != null">
+                record_type= #{recordType}
+                AND
+            </if>
+            <if test="recordTypeName != null">
+                record_type_name= #{recordTypeName}
+                AND
+            </if>
+            <if test="cancelCheckFlag != null">
+                cancel_check_flag= #{cancelCheckFlag}
+                AND
+            </if>
+            <if test="isPrimaryFlag != null">
+                is_primary_flag= #{isPrimaryFlag}
+                AND
+            </if>
+            <if test="sourceFlag != null">
+                source_flag= #{sourceFlag}
+                AND
+            </if>
+            <if test="curr != null">
+                curr= #{curr}
+                AND
+            </if>
+            <if test="accountNo != null">
+                account_no= #{accountNo}
+                AND
+            </if>
+            <if test="accountName != null">
+                account_name= #{accountName}
+                AND
+            </if>
+            <if test="accountType != null">
+                account_type= #{accountType}
+                AND
+            </if>
+            <if test="openBranchNo != null">
+                open_branch_no= #{openBranchNo}
+                AND
+            </if>
+            <if test="openBranchName != null">
+                open_branch_name= #{openBranchName}
+                AND
+            </if>
+            <if test="channelId != null">
+                channel_id= #{channelId}
+                AND
+            </if>
+            <if test="signBranchNo != null">
+                sign_branch_no= #{signBranchNo}
+                AND
+            </if>
+            <if test="recordStatus != null">
+                record_status= #{recordStatus}
+                AND
+            </if>
+            <if test="recordStatusList != null">
+                record_status in
+                <!-- foreach collection loop -->
+                <foreach collection="recordStatusList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                AND
+            </if>
+            <if test="cancelFlag != null">
+                cancel_flag= #{cancelFlag}
+                AND
+            </if>
+            <if test="cancelOperatorId != null">
+                cancel_operator_id= #{cancelOperatorId}
+                AND
+            </if>
+            <if test="cancelOperatorName != null">
+                cancel_operator_name= #{cancelOperatorName}
+                AND
+            </if>
+            <if test="effectiveDate != null">
+                effective_date= #{effectiveDate}
+                AND
+            </if>
+            <if test="expiredDate != null">
+                expired_date= #{expiredDate}
+                AND
+            </if>
+            <if test="migrateFlag != null">
+                migrate_flag= #{migrateFlag}
+                AND
+            </if>
+            <if test="branchNo != null">
+                branch_no= #{branchNo}
+                AND
+            </if>
+            <if test="operatorNo != null">
+                operator_no= #{operatorNo}
+                AND
+            </if>
+            <if test="relatedOwnerId != null">
+                related_owner_id= #{relatedOwnerId}
+                AND
+            </if>
+            <if test="relatedAccountNo != null">
+                related_account_no= #{relatedAccountNo}
+                AND
+            </if>
+            <if test="relatedSeqNo != null">
+                related_seq_no= #{relatedSeqNo}
+                AND
+            </if>
+            <if test="deviceId != null">
+                device_id= #{deviceId}
+                AND
+            </if>
+            <if test="extField1 != null">
+                extField1= #{extField1}
+                AND
+            </if>
+            <if test="extField2 != null">
+                extField2= #{extField2}
+                AND
+            </if>
+            <if test="extField3 != null">
+                extField3= #{extField3}
+                AND
+            </if>
+            <if test="extField4 != null">
+                extField4= #{extField4}
+                AND
+            </if>
+            <if test="extField5 != null">
+                extField5= #{extField5}
+                AND
+            </if>
+            <if test="extField6 != null">
+                extField6= #{extField6}
+            </if>
+        </trim>
+    </sql>
+
+    <sql id="Base_Select">
+        select
+        <include refid="Base_Column"/>
+        from
+        <include refid="Table_Name"/>
+        <where>
+            <include refid="Base_Where"/>
+        </where>
+    </sql>
+
+    <sql id="To_Archive_Where">
+        updated_at &lt;=#{updatedAt}
+    </sql>
+
+
+    <insert id="insert">
+        insert into
+        <include refid="Table_Name"/>
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ownerId != null">
+                owner_id,
+            </if>
+            <if test="recordId != null">
+                record_id,
+            </if>
+            <if test="recordType != null">
+                record_type,
+            </if>
+            <if test="recordTypeName != null">
+                record_type_name,
+            </if>
+            <if test="cancelCheckFlag != null">
+                cancel_check_flag,
+            </if>
+            <if test="isPrimaryFlag != null">
+                is_primary_flag,
+            </if>
+            <if test="sourceFlag != null">
+                source_flag,
+            </if>
+            <if test="curr != null">
+                curr,
+            </if>
+            <if test="accountNo != null">
+                account_no,
+            </if>
+            <if test="accountName != null">
+                account_name,
+            </if>
+            <if test="accountType != null">
+                account_type,
+            </if>
+            <if test="openBranchNo != null">
+                open_branch_no,
+            </if>
+            <if test="openBranchName != null">
+                open_branch_name,
+            </if>
+            <if test="channelId != null">
+                channel_id,
+            </if>
+            <if test="signBranchNo != null">
+                sign_branch_no,
+            </if>
+            <if test="recordStatus != null">
+                record_status,
+            </if>
+            signed_at,
+            <if test="cancelledAt != null">
+                cancelled_at,
+            </if>
+            <if test="cancelFlag != null">
+                cancel_flag,
+            </if>
+            <if test="cancelOperatorId != null">
+                cancel_operator_id,
+            </if>
+            <if test="cancelOperatorName != null">
+                cancel_operator_name,
+            </if>
+            <if test="effectiveDate != null">
+                effective_date,
+            </if>
+            <if test="expiredDate != null">
+                expired_date,
+            </if>
+            <if test="migrateFlag != null">
+                migrate_flag,
+            </if>
+            updated_at,
+            <if test="branchNo != null">
+                branch_no,
+            </if>
+            <if test="operatorNo != null">
+                operator_no,
+            </if>
+            <if test="relatedOwnerId != null">
+                related_owner_id,
+            </if>
+            <if test="relatedAccountNo != null">
+                related_account_no,
+            </if>
+            <if test="relatedSeqNo != null">
+                related_seq_no,
+            </if>
+            <if test="deviceId != null">
+                device_id,
+            </if>
+            <if test="extField1 != null">
+                extField1,
+            </if>
+            <if test="extField2 != null">
+                extField2,
+            </if>
+            <if test="extField3 != null">
+                extField3,
+            </if>
+            <if test="extField4 != null">
+                extField4,
+            </if>
+            <if test="extField5 != null">
+                extField5,
+            </if>
+            <if test="extField6 != null">
+                extField6,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ownerId != null">
+                #{ownerId},
+            </if>
+            <if test="recordId != null">
+                #{recordId},
+            </if>
+            <if test="recordType != null">
+                #{recordType},
+            </if>
+            <if test="recordTypeName != null">
+                #{recordTypeName},
+            </if>
+            <if test="cancelCheckFlag != null">
+                #{cancelCheckFlag},
+            </if>
+            <if test="isPrimaryFlag != null">
+                #{isPrimaryFlag},
+            </if>
+            <if test="sourceFlag != null">
+                #{sourceFlag},
+            </if>
+            <if test="curr != null">
+                #{curr},
+            </if>
+            <if test="accountNo != null">
+                #{accountNo},
+            </if>
+            <if test="accountName != null">
+                #{accountName},
+            </if>
+            <if test="accountType != null">
+                #{accountType},
+            </if>
+            <if test="openBranchNo != null">
+                #{openBranchNo},
+            </if>
+            <if test="openBranchName != null">
+                #{openBranchName},
+            </if>
+            <if test="channelId != null">
+                #{channelId},
+            </if>
+            <if test="signBranchNo != null">
+                #{signBranchNo},
+            </if>
+            <if test="recordStatus != null">
+                #{recordStatus},
+            </if>
+            <choose>
+                <when test="signedAt != null">
+                    #{signedAt},
+                </when>
+                <otherwise>
+                    current_timestamp(6),
+                </otherwise>
+            </choose>
+            <if test="cancelledAt != null">
+                #{cancelledAt},
+            </if>
+            <if test="cancelFlag != null">
+                #{cancelFlag},
+            </if>
+            <if test="cancelOperatorId != null">
+                #{cancelOperatorId},
+            </if>
+            <if test="cancelOperatorName != null">
+                #{cancelOperatorName},
+            </if>
+            <if test="effectiveDate != null">
+                #{effectiveDate},
+            </if>
+            <if test="expiredDate != null">
+                #{expiredDate},
+            </if>
+            <if test="migrateFlag != null">
+                #{migrateFlag},
+            </if>
+            current_timestamp(6),
+            <if test="branchNo != null">
+                #{branchNo},
+            </if>
+            <if test="operatorNo != null">
+                #{operatorNo},
+            </if>
+            <if test="relatedOwnerId != null">
+                #{relatedOwnerId},
+            </if>
+            <if test="relatedAccountNo != null">
+                #{relatedAccountNo},
+            </if>
+            <if test="relatedSeqNo != null">
+                #{relatedSeqNo},
+            </if>
+            <if test="deviceId != null">
+                #{deviceId},
+            </if>
+            <if test="extField1 != null">
+                #{extField1},
+            </if>
+            <if test="extField2 != null">
+                #{extField2},
+            </if>
+            <if test="extField3 != null">
+                #{extField3},
+            </if>
+            <if test="extField4 != null">
+                #{extField4},
+            </if>
+            <if test="extField5 != null">
+                #{extField5},
+            </if>
+            <if test="extField6 != null">
+                #{extField6},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update
+        <include refid="Table_Name"/>
+        <set>
+            <if test="recordTypeName != null">
+                record_type_name=#{recordTypeName},
+            </if>
+            <if test="cancelCheckFlag != null">
+                cancel_check_flag=#{cancelCheckFlag},
+            </if>
+            <if test="isPrimaryFlag != null">
+                is_primary_flag=#{isPrimaryFlag},
+            </if>
+            <if test="sourceFlag != null">
+                source_flag=#{sourceFlag},
+            </if>
+            <if test="curr != null">
+                curr=#{curr},
+            </if>
+            <if test="accountName != null">
+                account_name=#{accountName},
+            </if>
+            <if test="accountType != null">
+                account_type=#{accountType},
+            </if>
+            <if test="openBranchNo != null">
+                open_branch_no=#{openBranchNo},
+            </if>
+            <if test="openBranchName != null">
+                open_branch_name=#{openBranchName},
+            </if>
+            <if test="channelId != null">
+                channel_id=#{channelId},
+            </if>
+            <if test="recordStatus != null">
+                record_status=#{recordStatus},
+            </if>
+            <if test="signedAt != null">
+                signed_at=#{signedAt},
+            </if>
+            <if test="cancelledAt != null">
+                cancelled_at=#{cancelledAt},
+            </if>
+            <if test="cancelFlag != null">
+                cancel_flag=#{cancelFlag},
+            </if>
+            <if test="cancelOperatorId != null">
+                cancel_operator_id=#{cancelOperatorId},
+            </if>
+            <if test="cancelOperatorName != null">
+                cancel_operator_name=#{cancelOperatorName},
+            </if>
+            <if test="effectiveDate != null">
+                effective_date=#{effectiveDate},
+            </if>
+            <if test="expiredDate != null">
+                expired_date=#{expiredDate},
+            </if>
+            <if test="migrateFlag != null">
+                migrate_flag=#{migrateFlag},
+            </if>
+            updated_at=current_timestamp(6),
+            <if test="branchNo != null">
+                branch_no=#{branchNo},
+            </if>
+            <if test="operatorNo != null">
+                operator_no=#{operatorNo},
+            </if>
+            <if test="relatedOwnerId != null">
+                related_owner_id=#{relatedOwnerId},
+            </if>
+            <if test="relatedAccountNo != null">
+                related_account_no=#{relatedAccountNo},
+            </if>
+            <if test="relatedSeqNo != null">
+                related_seq_no=#{relatedSeqNo},
+            </if>
+            <if test="deviceId != null">
+                device_id=#{deviceId},
+            </if>
+            <if test="extField1 != null">
+                extField1=#{extField1},
+            </if>
+            <if test="extField2 != null">
+                extField2=#{extField2},
+            </if>
+            <if test="extField3 != null">
+                extField3=#{extField3},
+            </if>
+            <if test="extField4 != null">
+                extField4=#{extField4},
+            </if>
+            <if test="extField5 != null">
+                extField5=#{extField5},
+            </if>
+            <if test="extField6 != null">
+                extField6=#{extField6},
+            </if>
+        </set>
+        where
+        record_id=#{recordId}
+        and
+        owner_id = #{ownerId}
+    </update>
+
+    <!-- update signed records by owner, account and type -->
+    <update id="updateByStatus">
+        update
+        <include refid="Table_Name"/>
+        <set>
+            <if test="recordTypeName != null">
+                record_type_name=#{recordTypeName},
+            </if>
+            <if test="cancelCheckFlag != null">
+                cancel_check_flag=#{cancelCheckFlag},
+            </if>
+            <if test="isPrimaryFlag != null">
+                is_primary_flag=#{isPrimaryFlag},
+            </if>
+            <if test="sourceFlag != null">
+                source_flag=#{sourceFlag},
+            </if>
+            <if test="curr != null">
+                curr=#{curr},
+            </if>
+            <if test="accountName != null">
+                account_name=#{accountName},
+            </if>
+            <if test="accountType != null">
+                account_type=#{accountType},
+            </if>
+            <if test="openBranchNo != null">
+                open_branch_no=#{openBranchNo},
+            </if>
+            <if test="openBranchName != null">
+                open_branch_name=#{openBranchName},
+            </if>
+            <if test="channelId != null">
+                channel_id=#{channelId},
+            </if>
+            <if test="recordStatus != null">
+                record_status=#{recordStatus},
+            </if>
+            <if test="signedAt != null">
+                signed_at=#{signedAt},
+            </if>
+            <if test="cancelledAt != null">
+                cancelled_at=#{cancelledAt},
+            </if>
+            <if test="cancelFlag != null">
+                cancel_flag=#{cancelFlag},
+            </if>
+            <if test="cancelOperatorId != null">
+                cancel_operator_id=#{cancelOperatorId},
+            </if>
+            <if test="cancelOperatorName != null">
+                cancel_operator_name=#{cancelOperatorName},
+            </if>
+            <if test="effectiveDate != null">
+                effective_date=#{effectiveDate},
+            </if>
+            <if test="expiredDate != null">
+                expired_date=#{expiredDate},
+            </if>
+            <if test="migrateFlag != null">
+                migrate_flag=#{migrateFlag},
+            </if>
+            updated_at=current_timestamp(6),
+            <if test="branchNo != null">
+                branch_no=#{branchNo},
+            </if>
+            <if test="operatorNo != null">
+                operator_no=#{operatorNo},
+            </if>
+            <if test="relatedOwnerId != null">
+                related_owner_id=#{relatedOwnerId},
+            </if>
+            <if test="relatedAccountNo != null">
+                related_account_no=#{relatedAccountNo},
+            </if>
+            <if test="relatedSeqNo != null">
+                related_seq_no=#{relatedSeqNo},
+            </if>
+            <if test="deviceId != null">
+                device_id=#{deviceId},
+            </if>
+            <if test="extField1 != null">
+                extField1=#{extField1},
+            </if>
+            <if test="extField2 != null">
+                extField2=#{extField2},
+            </if>
+            <if test="extField3 != null">
+                extField3=#{extField3},
+            </if>
+            <if test="extField4 != null">
+                extField4=#{extField4},
+            </if>
+            <if test="extField5 != null">
+                extField5=#{extField5},
+            </if>
+            <if test="extField6 != null">
+                extField6=#{extField6},
+            </if>
+        </set>
+        where
+        <if test="ownerId != null">
+            owner_id = #{ownerId}
+            and
+        </if>
+        <if test="recordId != null">
+            record_id = #{recordId}
+            and
+        </if>
+        record_type = #{recordType}
+        and
+        account_no = #{accountNo}
+        and
+        record_status = '1'
+    </update>
+
+
+    <update id="updateByEntity">
+        UPDATE
+        <include refid="Table_Name"/>
+        <set>
+            <if test="entity.accountNo != null">
+                account_no=#{entity.accountNo},
+            </if>
+            <if test="entity.recordTypeName != null">
+                record_type_name=#{entity.recordTypeName},
+            </if>
+            <if test="entity.cancelCheckFlag != null">
+                cancel_check_flag=#{entity.cancelCheckFlag},
+            </if>
+            <if test="entity.isPrimaryFlag != null">
+                is_primary_flag=#{entity.isPrimaryFlag},
+            </if>
+            <if test="entity.sourceFlag != null">
+                source_flag=#{entity.sourceFlag},
+            </if>
+            <if test="entity.curr != null">
+                curr=#{entity.curr},
+            </if>
+            <if test="entity.accountName != null">
+                account_name=#{entity.accountName},
+            </if>
+            <if test="entity.accountType != null">
+                account_type=#{entity.accountType},
+            </if>
+            <if test="entity.openBranchNo != null">
+                open_branch_no=#{entity.openBranchNo},
+            </if>
+            <if test="entity.openBranchName != null">
+                open_branch_name=#{entity.openBranchName},
+            </if>
+            <if test="entity.channelId != null">
+                channel_id=#{entity.channelId},
+            </if>
+            <if test="entity.recordStatus != null">
+                record_status=#{entity.recordStatus},
+            </if>
+            <if test="entity.signedAt != null">
+                signed_at=#{entity.signedAt},
+            </if>
+            <if test="entity.cancelledAt != null">
+                cancelled_at=#{entity.cancelledAt},
+            </if>
+            <if test="entity.cancelFlag != null">
+                cancel_flag=#{entity.cancelFlag},
+            </if>
+            <if test="entity.cancelOperatorId != null">
+                cancel_operator_id=#{entity.cancelOperatorId},
+            </if>
+            <if test="entity.cancelOperatorName != null">
+                cancel_operator_name=#{entity.cancelOperatorName},
+            </if>
+            <if test="entity.effectiveDate != null">
+                effective_date=#{entity.effectiveDate},
+            </if>
+            <if test="entity.expiredDate != null">
+                expired_date=#{entity.expiredDate},
+            </if>
+            <if test="entity.migrateFlag != null">
+                migrate_flag=#{entity.migrateFlag},
+            </if>
+            updated_at=current_timestamp(6),
+            <if test="entity.branchNo != null">
+                branch_no=#{entity.branchNo},
+            </if>
+            <if test="entity.operatorNo != null">
+                operator_no=#{entity.operatorNo},
+            </if>
+            <if test="entity.relatedOwnerId != null">
+                related_owner_id=#{entity.relatedOwnerId},
+            </if>
+            <if test="entity.relatedAccountNo != null">
+                related_account_no=#{entity.relatedAccountNo},
+            </if>
+            <if test="entity.relatedSeqNo != null">
+                related_seq_no=#{entity.relatedSeqNo},
+            </if>
+            <if test="entity.deviceId != null">
+                device_id=#{entity.deviceId},
+            </if>
+            <if test="entity.extField1 != null">
+
+                extField1=#{entity.extField1},
+            </if>
+            <if test="entity.extField2 != null">
+                extField2=#{entity.extField2},
+            </if>
+            <if test="entity.extField3 != null">
+                extField3=#{entity.extField3},
+            </if>
+            <if test="entity.extField4 != null">
+                extField4=#{entity.extField4},
+            </if>
+            <if test="entity.extField5 != null">
+                extField5=#{entity.extField5},
+            </if>
+            <if test="entity.extField6 != null">
+                extField6=#{entity.extField6}
+            </if>
+        </set>
+        <where>
+            <trim prefix="(" suffix=")" suffixOverrides="AND">
+                <if test="cond.ownerId != null">
+                    owner_id=#{cond.ownerId}
+                    AND
+                </if>
+                <if test="cond.recordId != null">
+                    record_id=#{cond.recordId}
+                    AND
+                </if>
+                <if test="cond.recordType != null">
+                    record_type=#{cond.recordType}
+                    AND
+                </if>
+                <if test="cond.recordTypeName != null">
+                    record_type_name=#{cond.recordTypeName}
+                    AND
+                </if>
+                <if test="cond.cancelCheckFlag != null">
+                    cancel_check_flag=#{cond.cancelCheckFlag}
+                    AND
+                </if>
+                <if test="cond.isPrimaryFlag != null">
+                    is_primary_flag=#{cond.isPrimaryFlag}
+                    AND
+                </if>
+                <if test="cond.sourceFlag != null">
+                    source_flag=#{cond.sourceFlag}
+                    AND
+                </if>
+                <if test="cond.curr != null">
+                    curr=#{cond.curr}
+                    AND
+                </if>
+                <if test="cond.accountNo != null">
+                    account_no=#{cond.accountNo}
+                    AND
+                </if>
+                <if test="cond.accountName != null">
+                    account_name=#{cond.accountName}
+                    AND
+                </if>
+                <if test="cond.accountType != null">
+                    account_type=#{cond.accountType}
+                    AND
+                </if>
+                <if test="cond.openBranchNo != null">
+                    open_branch_no=#{cond.openBranchNo}
+                    AND
+                </if>
+                <if test="cond.openBranchName != null">
+                    open_branch_name=#{cond.openBranchName}
+                    AND
+                </if>
+                <if test="cond.channelId != null">
+                    channel_id=#{cond.channelId}
+                    AND
+                </if>
+                <if test="cond.signBranchNo != null">
+                    sign_branch_no=#{cond.signBranchNo}
+                    AND
+                </if>
+                <if test="cond.recordStatus != null">
+                    record_status=#{cond.recordStatus}
+                    AND
+                </if>
+                <if test="cond.cancelFlag != null">
+                    cancel_flag=#{cond.cancelFlag}
+                    AND
+                </if>
+                <if test="cond.cancelOperatorId != null">
+                    cancel_operator_id=#{cond.cancelOperatorId}
+                    AND
+                </if>
+                <if test="cond.cancelOperatorName != null">
+                    cancel_operator_name=#{cond.cancelOperatorName}
+                    AND
+                </if>
+                <if test="cond.migrateFlag != null">
+                    migrate_flag=#{cond.migrateFlag}
+                    AND
+                </if>
+                <if test="cond.branchNo != null">
+                    branch_no=#{cond.branchNo}
+                    AND
+                </if>
+                <if test="cond.operatorNo != null">
+                    operator_no=#{cond.operatorNo}
+                    AND
+                </if>
+                <if test="cond.relatedOwnerId != null">
+                    related_owner_id=#{cond.relatedOwnerId}
+                    AND
+                </if>
+                <if test="cond.relatedAccountNo != null">
+                    related_account_no=#{cond.relatedAccountNo}
+                    AND
+                </if>
+                <if test="cond.relatedSeqNo != null">
+                    related_seq_no=#{cond.relatedSeqNo}
+                    AND
+                </if>
+                <if test="cond.deviceId != null">
+                    device_id=#{cond.deviceId}
+                    AND
+                </if>
+                <if test="cond.extField1 != null">
+                    extField1=#{cond.extField1}
+                    AND
+                </if>
+                <if test="cond.extField2 != null">
+                    extField2=#{cond.extField2}
+                    AND
+                </if>
+                <if test="cond.extField3 != null">
+                    extField3=#{cond.extField3}
+                    AND
+                </if>
+                <if test="cond.extField4 != null">
+                    extField4=#{cond.extField4}
+                    AND
+                </if>
+                <if test="cond.extField5 != null">
+                    extField5=#{cond.extField5}
+                    AND
+                </if>
+                <if test="cond.extField6 != null">
+                    extField6=#{cond.extField6}
+                </if>
+            </trim>
+        </where>
+    </update>
+
+    <delete id="delete">
+        delete from
+        <include refid="Table_Name"/>
+        <where>
+            <include refid="Base_Where"/>
+        </where>
+    </delete>
+
+    <select id="count" parameterType="java.util.Map" resultType="int">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select count(1) from
+        <include refid="Table_Name"/>
+        <where>
+            <include refid="Base_Where"/>
+        </where>
+    </select>
+
+    <!--  inactive account count query -->
+    <select id="inactiveAccountCount" parameterType="java.util.Map" resultType="int">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select count(1) from
+        <include refid="Table_Name"/>
+        <where>
+            <trim suffixOverrides="AND">
+            <if test="ownerId != null">
+                owner_id= #{ownerId}
+                AND
+            </if>
+            <if test="accountNo != null">
+                account_no= #{accountNo}
+                AND
+            </if>
+            <if test="signedAt != null">
+                signed_at > #{signedAt}
+            </if>
+            </trim>
+        </where>
+    </select>
+
+    <select id="selectOne" resultMap="BaseResultMap">
+        <include refid="Base_Select"/>
+    </select>
+
+    <!-- batch step deprecated -->
+    <select id="countForArchive" parameterType="java.util.Map" resultType="int">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select count(1) from
+        <include refid="Table_Name"/>
+        <where>
+            <include refid="To_Archive_Where"/>
+        </where>
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        <include refid="Base_Select"/>
+    </select>
+
+
+    <select id="selectOneByModified" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column"/>
+        from
+        <include refid="Table_Name"/>
+        <where>
+            <include refid="Base_Where"/>
+            order by updated_at desc limit 1
+        </where>
+    </select>
+
+    <!-- batch step deprecated -->
+    <select id="selectListForArchive" resultMap="BaseResultMap">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select
+        <include refid="Base_Column"/>
+        from
+        <include refid="Table_Name"/>
+        <where>
+            <include refid="To_Archive_Where"/>
+        </where>
+    </select>
+
+    <select  id = "countByDateAndExpireDate" parameterType = "java.util.Map" resultType = "int">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select
+        count(1)
+        from
+        <include refid="Table_Name" />
+        where
+        record_type = #{recordType}
+        and
+        record_status = #{recordStatus}
+        <if test="sourceFlag != null">
+            and
+            source_flag = #{sourceFlag}
+        </if>
+        <if test="updatedBeforeDate != null">
+            and
+            updated_at &lt; #{updatedBeforeDate}
+        </if>
+        <if test="expiredDate != null">
+            and
+            expired_date &lt; #{expiredDate}
+        </if>
+        <if test="effectiveDate != null">
+            and
+            effective_date &lt; #{effectiveDate}
+        </if>
+        and
+        (
+        signed_at &lt; #{signedBeforeDate}
+        or
+        expired_date &lt; #{pendingExpireDate}
+        )
+    </select>
+
+
+    <select  id = "selectListByDateAndExpireDate"  resultMap = "BaseResultMap">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select
+        <include refid="Base_Column" />
+        from
+        <include refid="Table_Name" />
+        where
+        record_type = #{recordType}
+        and
+        record_status = #{recordStatus}
+        <if test="sourceFlag != null">
+            and
+            source_flag = #{sourceFlag}
+        </if>
+        <if test="updatedBeforeDate != null">
+            and
+            updated_at &lt; #{updatedBeforeDate}
+        </if>
+        <if test="expiredDate != null">
+            and
+            expired_date &lt; #{expiredDate}
+        </if>
+        <if test="effectiveDate != null">
+            and
+            effective_date &lt; #{effectiveDate}
+        </if>
+        and
+        (
+        signed_at &lt; #{signedBeforeDate}
+        or
+        expired_date &lt; #{pendingExpireDate}
+        )
+    </select>
+
+    <select id="selectForUpdate" resultMap="BaseResultMap" useCache="false">
+        <include refid="Base_Select"/>
+        for update
+    </select>
+
+    <!-- sql optimization placeholder -->
+    <select id="countByDate" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from
+        <include refid="Table_Name"/>
+        where
+        record_status = #{recordStatus}
+        <if test="sourceFlag != null">
+            and
+            source_flag = #{sourceFlag}
+        </if>
+        <if test="singleRecordType != null">
+            and
+            record_type = #{singleRecordType}
+        </if>
+        <if test="updatedBeforeDate != null">
+            and
+            updated_at >= #{updatedBeforeDate}
+            and
+            updated_at &lt; DATE_ADD(#{updatedBeforeDate}, interval 1 day)
+        </if>
+        <if test="expiredDate != null">
+            and
+            expired_date &lt;= #{expiredDate}
+        </if>
+        <if test="effectiveDate != null">
+            and
+            effective_date = #{effectiveDate}
+        </if>
+        <if test="signedBeforeDate != null">
+            and
+            signed_at >= #{signedBeforeDate}
+            and
+            signed_at &lt; DATE_ADD(#{signedBeforeDate}, interval 1 day)
+        </if>
+    </select>
+
+    <!-- sql optimization placeholder -->
+    <select id="selectListByDate" resultMap="BaseResultMap">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select
+        <include refid="Base_Column"/>
+        from
+        <include refid="Table_Name"/>
+        where
+        record_status = #{recordStatus}
+        <if test="sourceFlag != null">
+            and
+            source_flag = #{sourceFlag}
+        </if>
+        <if test="singleRecordType != null">
+            and
+            record_type = #{singleRecordType}
+        </if>
+        <if test="updatedBeforeDate != null">
+            and
+            updated_at >= #{updatedBeforeDate}
+            and
+            updated_at &lt; DATE_ADD(#{updatedBeforeDate}, interval 1 day)
+        </if>
+        <if test="expiredDate != null">
+            and
+            expired_date &lt;= #{expiredDate}
+        </if>
+        <if test="effectiveDate != null">
+            and
+            effective_date = #{effectiveDate}
+        </if>
+        <if test="signedBeforeDate != null">
+            and
+            signed_at >= #{signedBeforeDate}
+            and
+            signed_at &lt; DATE_ADD(#{signedBeforeDate}, interval 1 day)
+        </if>
+        <if test="extField1 != null">
+            and
+            extField1= #{extField1}
+        </if>
+
+    </select>
+
+    <!-- query optimization placeholder -->
+    <select id="selectByRelatedParty" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column"/>
+        from
+        <include refid="Table_Name"/>
+        <where>
+            owner_id = #{ownerId}
+            and
+            <if test="recordType != null">
+                record_type = #{recordType}
+                and
+            </if>
+            <if test="recordStatus != null">
+                record_status = #{recordStatus}
+                and
+            </if>
+            record_id in
+            <foreach collection="relatedRecordIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        order by signed_at desc
+    </select>
+
+    <select id="countByEffectiveDate" parameterType="java.util.Map" resultType="int">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select
+        count(1)
+        from
+        <include refid="Table_Name"/>
+        where
+        record_status = #{recordStatus}
+        <if test="sourceFlag != null">
+            and
+            source_flag = #{sourceFlag}
+        </if>
+        <if test="recordType != null">
+            and
+            record_type = #{recordType}
+        </if>
+        <if test="effectiveDate != null">
+            and
+            effective_date = #{effectiveDate}
+        </if>
+    </select>
+
+
+    <select id="selectListByEffectiveDate" resultMap="BaseResultMap">
+        <if test="comment != null">
+            ${comment}
+        </if>
+        select
+        <include refid="Base_Column"/>
+        from
+        <include refid="Table_Name"/>
+        where
+        record_status = #{recordStatus}
+        <if test="sourceFlag != null">
+            and
+            source_flag = #{sourceFlag}
+        </if>
+        <if test="recordType != null">
+            and
+            record_type = #{recordType}
+        </if>
+        <if test="effectiveDate != null">
+            and
+            effective_date = #{effectiveDate}
+        </if>
+    </select>
+
+    <!-- query records by owner, status and type -->
+    <select id="selectListByStatus"    resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column" />
+        from
+        <include refid="Table_Name" />
+        where
+        <trim prefixOverrides="AND">
+            <if test = "ownerId!=null">
+                owner_id=#{ownerId}
+            </if>
+            <if test = "recordType!=null">
+                and
+                record_type=#{recordType}
+            </if>
+            <if test = "recordStatusList!=null">
+                and
+                record_status in
+                <foreach collection="recordStatusList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </trim>
+    </select>
+
+    <update id="updateToReverse" >
+        UPDATE
+        t_sample_record t
+        <set>
+            t.record_status  = #{entity.recordStatus},
+            t.cancel_operator_id=null,
+            t.cancel_operator_name=null,
+            t.updated_at = CURRENT_TIMESTAMP(6),
+            t.cancelled_at = null
+        </set>
+        <where>
+            <trim prefix="(" suffix=")" suffixOverrides="AND">
+                <if test="cond.recordId != null">
+                    t.record_id=#{cond.recordId}
+                    AND
+                </if>
+                <if test="cond.ownerId != null">
+                    t.owner_id=#{cond.ownerId}
+                    AND
+                </if>
+            </trim>
+        </where>
+    </update>
+
+    <select id="selectOne2"  resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column" />
+        from
+        <include refid="Table_Name" />
+        where
+        <trim suffixOverrides="AND">
+            <if test="ownerId != null">
+                owner_id= #{ownerId}
+                AND
+            </if>
+            <if test="recordType != null">
+                record_type= #{recordType}
+                AND
+            </if>
+            <if test="recordTypeList != null">
+                record_type in
+                <!-- foreach collection loop -->
+                <foreach collection="recordTypeList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                AND
+            </if>
+            <if test="accountNo != null">
+                account_no= #{accountNo}
+                AND
+            </if>
+            <if test="recordStatus != null">
+                record_status= #{recordStatus}
+                AND
+            </if>
+            <if test="recordStatusList != null">
+                record_status in
+                <!-- foreach collection loop -->
+                <foreach collection="recordStatusList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                AND
+            </if>
+            <if test="relatedAccountNo != null">
+                related_account_no= #{relatedAccountNo}
+            </if>
+        </trim>
+    </select>
+
+    <!-- archived pre-registration query -->
+    <!-- 	<select  id = "countByDate"  parameterType="java.util.Map"  resultType="int"> -->
+    <!-- 	<if test="comment != null"> -->
+    <!-- 	${comment} -->
+    <!-- 	</if> -->
+    <!-- 		select count(1) -->
+    <!-- 		     from -->
+    <!-- 		<include refid="Table_Name" /> -->
+    <!-- 		     where  -->
+    <!-- 		record_status = #{previousStatus} -->
+    <!-- 		     and -->
+    <!-- 		updated_at &lt; #{updatedBeforeDate}	 -->
+    <!-- 	</select> -->
+
+    <!-- archived pre-registration query with paging -->
+    <!-- 	<select  id = "selectListByOldConState"  parameterType="java.util.Map"  resultMap = "BaseResultMap"> -->
+    <!-- 	<if test="comment != null"> -->
+    <!-- 	${comment} -->
+    <!-- 	</if> -->
+    <!-- 			 select  -->
+    <!-- 		<include refid="Base_Column" /> -->
+    <!-- 		     from -->
+    <!-- 		<include refid="Table_Name" /> -->
+    <!-- 		     where  -->
+    <!-- 		record_status = #{previousStatus} -->
+    <!-- 		     and -->
+    <!-- 		updated_at &lt; #{updatedBeforeDate}	 -->
+    <!-- 	</select> -->
+</mapper>
