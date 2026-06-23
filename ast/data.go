@@ -78,16 +78,19 @@ func (d *Data) AddChildren(ns ...Node) error {
 
 func (d *Data) GetStmt(ctx *Context) (string, error) {
 	buff := bytes.Buffer{}
+	num := 1
 	for _, child := range d.Nodes {
 		switch dt := child.(type) {
 		case Value:
 			buff.WriteString(dt.String())
 		case *Param:
-			buff.WriteString(dt.String())
+			buff.WriteString(fmt.Sprintf("$%d", num))
+			num += 1
 		case *Variable:
 			variable, ok := ctx.GetVariable(dt.Name)
 			if !ok {
-				buff.WriteString("?")
+				buff.WriteString(fmt.Sprintf("$%d", num))
+				num += 1
 				//return "", fmt.Errorf("variable %s undifine", dt.Name)
 			} else {
 				buff.WriteString(variable)
